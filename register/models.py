@@ -4,49 +4,53 @@ from django.contrib.auth.models import User
 
 
 class Person(models.Model):
-    # user=models.ForeignKey(User,on_delete=models.CASCADE )
     first_name =models.CharField(max_length=100)
     other_name =models.CharField(max_length=100)
     Local_church=models.CharField(choices=CHURCH, max_length=100 )
     category=models.CharField(choices=CATEGORY, max_length=100)
 
- 
+
     
     def __str__(self):
         return f"{self.first_name} {self.other_name}"
     
 
 class Student(models.Model):
-    # user=models.ForeignKey(User,on_delete=models.CASCADE )
     person = models.ForeignKey(Person, on_delete=models.CASCADE)
-    levels = models.CharField(choices=LEVEL, max_length=100)
+    levels = models.CharField(choices=LEVEL, max_length=100,blank=True, null=True)
+    mode=models.CharField(choices=MODE, max_length=100, blank=True, null=True)
+    att_count=models.IntegerField(default=0)
 
     def __str__(self):
          return f"{self.person.first_name} {self.person.other_name}"
     
 
 class LessonTopic(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE )
     date_created =models.DateField(auto_now_add=True)
     date_edited=models.DateField(auto_now=True)
-    date=models.DateField()
-    teacher=models.ForeignKey(Person, on_delete=models.CASCADE)
+    taught_on_date=models.DateField()
+    teacher=models.ForeignKey(Person, on_delete=models.CASCADE, related_name="teacher")
     topic= models.CharField(max_length=100)
     levels = models.CharField(choices=LEVEL, max_length=100)
     description=models.CharField(max_length=100)
+    mode=models.CharField(choices=MODE, max_length=100, blank=True, null=True)
+    is_taught= models.BooleanField(default=False)
+    valid= models.BooleanField(default=True)
+
 
     def __str__ (self):
+        return f"{self.topic} {self.taught_on_date}"
 
-        return f"{self.topic} {self.date}"
 
+# class Enrollment(models.Model):
+#     # user=models.ForeignKey(User,on_delete=models.CASCADE )
+#     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    
+#     enrollment_date = models.DateField(auto_now_add=True)
 
-class Enrollment(models.Model):
-    # user=models.ForeignKey(User,on_delete=models.CASCADE )
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    mode=models.CharField(choices=MODE, max_length=100)
-    enrollment_date = models.DateField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.student.person.first_name} {self.student.person.other_name} enrolled in {self.mode} classes on {self.enrollment_date}"
+#     def __str__(self):
+#         return f"{self.student.person.first_name} {self.student.person.other_name} enrolled in {self.mode} classes on {self.enrollment_date}"
 
 class ClassDay(models.Model):
     date_created = models.DateField(auto_now_add=True)
@@ -55,13 +59,24 @@ class ClassDay(models.Model):
 
     def __str__ (self):
         return f"{self.lesson.topic} on {self.date_created}"
+    
+
+class LessonSummary(models.Model):
+    date_created = models.DateField(auto_now_add=True)
+    lesson=models.ForeignKey(LessonTopic, on_delete=models.CASCADE)
+    number_of_students=models.IntegerField()
+    comment=models.TextField(max_length=200, blank=True, null=True)
+
+
  
 
 class Attendance(models.Model):
-    # user=models.ForeignKey(User,on_delete=models.CASCADE )
     classday = models.ForeignKey(ClassDay, on_delete=models.CASCADE)
     students=models.ForeignKey(Student, on_delete=models.CASCADE)
     in_attendance=models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('classday', 'students')
 
     def __str__(self):
         return f"{self.students.person.first_name} {self.students.person.other_name}"
@@ -71,13 +86,22 @@ class Notice (models.Model):
     title=models.CharField(max_length=100)
     content=models.TextField()
 
-    
 
-# class Lesson (models.Model):
-#     date= models.DateField(auto_now_add=True)
-#     teacher= models.ForeignKey(Person, on_delete=models.CASCADE)
-#     learner= models.ManyToManyField( Attendance, through="DayLesson")
+class OnlineLesson(models.Model):
+    lesson = models.ForeignKey(LessonTopic, on_delete=models.CASCADE)
+    video_url = models.URLField( blank=True, null=True)  
 
-# class DayLesson(models.Model):
-#     lesson =models.ForeignKey(Lesson, on_delete=models.CASCADE)
-#     attendance= models.ForeignKey(Attendance, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.lesson.topic
+
+
+class EnrolledStudent(models.Model):
+    lesson = models.ForeignKey(OnlineLesson, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    enrollment_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('lesson', 'student')
+
+    def __str__(self):
+        return f"{self.student.person} - {self.lesson.title}"

@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title></title>
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="" />
-  </head>
-  <body>
-    <h1>This is home page</h1>
-    {% for person in attendance%}
-    <ul>
-      <li>
-        {{forloop.counter}}.{{person.first_name}} {{person.other_name}}
-      </li>
-    </ul>
+
+{% extends "register/base.html"%}
+{% block main%}
+    {% for person in persons%}
+    <ol class="list-group list-group-numbered">
+  <li class="list-group-item d-flex justify-content-between align-items-start">
+    <div class="ms-2 me-auto">
+      <div class="fw-bold">Subheading</div>
+      Content for list item
+    </div>
+    <span class="badge bg-primary rounded-pill">14</span>
+  </li>
+  </ol>
     {% endfor%}
-    <script src="" async defer></script>
-  </body>
-</html>
+ {% endblock main %}

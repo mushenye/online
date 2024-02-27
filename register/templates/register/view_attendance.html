@@ -1,0 +1,12 @@
+{% extends "register/base.html"%}
+{% block main%}
+<a class= "btn btn-primary" href="#" >#</a>
+<a class= "btn btn-primary" href="#" > #</a>
+    {% for person in attendance%}
+    <ul>
+      <li>
+       <a href="{% url 'mark' person.id %}" >{{forloop.counter}}. {{person.students.person}}</a>
+      </li>
+    </ul>
+    {% endfor%}
+ {% endblock main %}

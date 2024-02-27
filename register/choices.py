@@ -1,8 +1,8 @@
 MODE = (
-        ('N', 'Normal'),
-        ('O', 'Online'),
-        ('SB', 'Schoolbased'),
-        ('SP', 'Special'),
+        ('Normal', 'Normal'),
+        ('Online', 'Online'),
+        ('SchoolBased', 'Schoolbased'),
+        ('Special', 'Special'),
     )
 
 CATEGORY = (
@@ -25,15 +25,15 @@ LEVEL =(
     )
 
 CHURCH =(
-        ('SB', 'South B'),
-        ('KIB', 'Kiambiu'),
-        ('KTE', 'Kitengela'),
-        ('WAD', 'Waudo'),
-        ('EAS', 'Eastleigh'),
-        ('UMJ', 'Umoja'),
-        ('MUT', 'Muthaiga'),
-        ('RU', 'Runda'),
-        ('KAR', 'Kariokor'),
+        ('South B', 'South B'),
+        ('Kiambiu', 'Kiambiu'),
+        ('Kitengela', 'Kitengela'),
+        ('Waudo', 'Waudo'),
+        ('Eastleigh', 'Eastleigh'),
+        ('Umoja', 'Umoja'),
+        ('Muthaiga', 'Muthaiga'),
+        ('Runda', 'Runda'),
+        ('Kariokor', 'Kariokor'),
 
 
     

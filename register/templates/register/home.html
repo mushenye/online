@@ -1,26 +1,52 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title></title>
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="" />
-  </head>
-  <body>
-    <h1>This is home page</h1>
-    {% for person in persons%}
-    <ul>
-      <li>
-        {{forloop.counter}}.{{person.first_name}} {{person.other_name}}
-      </li>
-    </ul>
-    {% endfor%}
-    <script src="" async defer></script>
-  </body>
-</html>
+{% extends "register/base.html" %} 
+{% block main %}
+<section class="h-100 h-custom p-2" style="background-color: #eee">
+  <div class="card m-2">
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-sm btn-light" type="submit" name="query" value="L">
+        Learners
+      </button>
+      <button class="btn btn-sm btn-light" type="submit" name="query" value="T">
+        Teachers
+      </button>
+    </form>
+  </div>
+
+  <table class="table table-responsive">
+    <thead>
+      <tr>
+        <th scope="col"><small>S/no</small></th>
+        <th scope="col"><small>Name</small></th>
+        <th scope="col"><small>Local Church</small></th>
+        {% comment %} <th scope="col"><small>Attendance</small></th> {% endcomment %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for person in persons %}
+      <tr>
+        <td scope="row"><small>{{ forloop.counter }}</small></td>
+        <td>
+          <a
+            class="text-decoration-none"
+            href="{% url 'person_details' person.id %}"
+            ><small
+              >{{ person.first_name.capitalize }} 
+              {{person.other_name.capitalize}}</small
+            ></a
+          >
+        </td>
+        <td><small>{{ person.Local_church }}</small></td>
+        {% comment %} <td>
+          {% if person.category=="L" %}
+          <small>{{ person.student.att_count }}</small>
+          {% else %}
+          <small>N/a</small>
+          {% endif %}
+        </td> {% endcomment %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock main %}

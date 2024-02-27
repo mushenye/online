@@ -1,0 +1,14 @@
+ {% extends "register/base.html"%}
+{% block main%}
+
+<h6>Name:</h6>
+<h6>mode:</h6>
+<h6>Local Meeting:</h6>
+<h6>Lesson att:</h6>
+<h6>attendance: {{student.att_count}}</h6>
+
+
+
+
+<a class="btn btn-sm btn-success" href="{% url 'edit_person' person.id %}">Edit</a>
+ {% endblock main %}

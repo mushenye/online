@@ -1,0 +1,23 @@
+{% extends 'register/base.html' %}  
+{% load static %}
+{%block information%}MESSAGES {%endblock information %}
+
+ {%block main-content%}
+ 
+  <div class="container" >
+
+<ul class="list-group">
+       {% for message in messages%}
+       <h4 class=" text-decoration-none text-uppercase">
+        <li class="list-group-item list-group-item-action list-group-item-info" > 
+            {% comment %} {{ message.chat.customer}}  {% endcomment %}
+            {{message.sender}}
+            {{message.content}}
+        </li> 
+        </h4>
+        {% endfor%}
+</ul>  
+
+</div>
+        <script src="" async defer></script>
+   {% endblock%}

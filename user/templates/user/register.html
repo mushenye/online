@@ -1,9 +1,9 @@
-{% extends "register/base.html"%}
-{% load crispy_forms_tags%} 
+{% extends 'register/base.html' %}  
 {% load static %}
-{% block main %}
-    
+{% load crispy_forms_tags%} 
+{%block information%} REGISTER {%endblock information %} 
 
+{%block main%}
 
 <div class="container">
   <section class="h-100 h-custom" style="background-color: #eee">
@@ -14,11 +14,11 @@
             <div class="card">
               <div class="card-body p-4">
                   <div class="row">
-<legend class="border-bottom mb-4 text-center">
-                              <small ><strong> Create your lesson. Ensure you are aware of the scheduled date </strong></small>
+<legend class="border-bottom mb-4">
+                              Join us Today
                               
                             </legend>
-                           
+                            <hr>
 
           <div class="col-lg-6">
            
@@ -38,16 +38,17 @@
                         <div class="col-lg-6">
                             <div class="alert">
                               <p>
-                                
+                                <strong> Please note:</strong>
+                                Enter your correct Email address, you will need it when want to reset your password
                               </p>
                             </div>
 
 
 
-                           <div class="card p-4 ">
+                           <div class="card p-4">
                   
-                              <div class="d-flex justify-content-between ">
-                                <button type="submit" class="text-center btn btn-sm btn-success">
+                              <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn btn-success">
                                   SUBMIT
                                 </button>
                               
@@ -55,7 +56,11 @@
                               <div class="d-flex justify-content-between">
                               
                                       <div class="border-top pt-3">
-                                                
+                                                <small class="">
+                                             <strong>    Already have an account with us?
+                                                  <a class="ml-5 btn btn-outline-info" href="{% url 'login' %}">
+                                                    Sign in </strong></a
+                                                  >
                                                 </small>
                                       
                               </div>

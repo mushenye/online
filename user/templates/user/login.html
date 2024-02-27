@@ -1,0 +1,61 @@
+{% extends 'register/base.html' %}  
+{% load static %}
+{%block information%} LOG IN {%endblock information %}
+{% load crispy_forms_tags%}
+ 
+ {%block main%}
+ <div class="container">
+<section class="h-100 h-custom" style="background-color: #eee;width:600px; margin:auto;">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col">
+        <div class="card">
+          <div class="card-body p-2">
+            <h5 class="mb-3"><a href="#" class="text-body"><i     
+                      class="fas fa-long-arrow-alt-left me-2"></i>Back</a></h5>
+                <hr>
+
+                                        <form method="post">
+                                      <div class="row">
+                                        <div class="col">
+                                      
+                                              {% csrf_token %}  
+                                            <div class="card mb-3">
+                                                <div class="card-body">
+                                                      <div class="justify-content-between">
+                                                        {% comment %} <div class="d-flex flex-row align-items-center" style="gap:50px;">  {% endcomment %}
+                                                        {{form|crispy}}
+                                                      {% comment %} </div> {% endcomment %}
+                                                      </div>
+                                                 </div>
+                                              </div> 
+                                        
+
+                                            <div class="card mb-3 align-items-center p-3 ">
+                                                  <div class="d-flex justify-content-between align-items-center mb-4">
+                                                  <button type= "submit" class="btn btn btn-success">
+                                                    SIGN IN    </button>
+                                                  </div>
+
+                                                  <div class="d-flex justify-content-between">
+                                                        <div class="border-top pt-3">
+                                                          <small class="">
+                                                        <strong>    Do you need an account with us ?</strong>
+                                                            <a class="ml-5 btn btn-outline-info" href="{% url 'register' %}"> Sign Up </a>
+                                                          </small>
+                                                        </div>
+                                                  </div>
+                                                      </div>   
+                                        </div>          
+                                      </div>  
+                                          <form>
+           </div>                             
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+{% endblock%}
+
+

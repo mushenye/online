@@ -1,0 +1,11 @@
+{% extends "register/base.html"%} {% block main%} 
+{% comment %} {% comment %}
+
+<a class="btn btn-primary" href="{% url 'viewlesson'%}"> Lesson List</a> {%
+endcomment %} {% endcomment %}
+{% for student in students %}
+<ul>
+    <a class="btn btn-primary" href="#">
+  <li>{{forloop.counter}}.{{student.person.first_name}} {{student.person.other_name}}</li></a>
+</ul>
+{% endfor%} {% endblock main %}
