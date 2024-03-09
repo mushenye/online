@@ -2,8 +2,9 @@ from datetime import date, datetime
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
-from register.forms import CommentForm, LessonForm, OnlineLessonForm, PersonForm, StudentForm
-from register.models import Attendance, ClassDay, LessonSummary, LessonTopic, OnlineLesson, Person, Student
+from django.urls import reverse
+from register.forms import AttendaceForm, CommentForm, LessonForm, OnlineLessonForm, PersonForm, StudentForm
+from register.models import Attendance, ClassDay, LessonSummary, LessonTopic, OnlineLearner, OnlineLesson, Person, Student
 
 # Create your views here.
 def home(request):
@@ -32,10 +33,25 @@ def person_details(request, pk):
         try:
             student = Student.objects.get(person=person)
             context['student'] = student
+            
         except Student.DoesNotExist:
             pass
 
     return render(request, 'register/person_detail.html', context)
+
+
+def enroll(request, pk):
+    user= request.user
+    if user.is_staff:
+        student=get_object_or_404(Student, id=pk)
+        student.is_enrolled= True
+        student.save()
+        messages.success(request, f'{student.person} has been enrolled in {student.mode} class succesfully')
+
+    else:
+        messages.warning(request, 'Request not allowed !!')
+
+    return redirect('home')
 
 
 def add_person(request):
@@ -61,53 +77,63 @@ def add_person(request):
 
 
 def edit_person(request, pk):
+    user=request.user
+    if user.is_staff:
+        try: 
+            person = get_object_or_404(Person, id=pk)
+        except Person.DoesNotExist:
+        
+            messages.warning(request, "No person found. Check your credentials.")
+            return redirect('home')
 
-    try: 
-        person = get_object_or_404(Person, id=pk)
-    except Person.DoesNotExist:
-       
-        messages.warning(request, "No person found. Check your credentials.")
-        return redirect('home')
-
-    if request.method == "POST":
-        form = PersonForm(request.POST, instance=person)
-        if form.is_valid():
-            category = form.cleaned_data['category']
-            if category == 'L':
-                person = form.save() 
-                new_student, created = Student.objects.get_or_create(person=person)
-                return redirect('edit_student', new_student.id)
-            else:
-                form.save()
-                try:
-                    student = Student.objects.get(person=person)
-                    student.delete()
-                except Student.DoesNotExist:
-                    pass  
-                return redirect('home')
-    else:
-        form = PersonForm(instance=person)
+        if request.method == "POST":
+            form = PersonForm(request.POST, instance=person)
+            if form.is_valid():
+                category = form.cleaned_data['category']
+                if category == 'L':
+                    person = form.save() 
+                    new_student, created = Student.objects.get_or_create(person=person)
+                    return redirect('edit_student', new_student.id)
+                else:
+                    form.save()
+                    try:
+                        student = Student.objects.get(person=person)
+                        student.delete()
+                    except Student.DoesNotExist:
+                        pass  
+                    return redirect('home')
+        else:
+            form = PersonForm(instance=person)
     
-    return render(request, 'register/addperson.html', context={"form": form})
-
+        return render(request, 'register/addperson.html', context={"form": form})
+    else:
+        messages.warning(request, 'Request not allowed !!')
+        return redirect('home')
          
        
 
 def student(request,pk):
-    student=Student.objects.get(id=pk)
-    if request.method == "POST":
-        form = StudentForm(request.POST, instance=student)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
+    user=request.user
+    if user.is_staff:
+        student=Student.objects.get(id=pk)
+        if request.method == "POST":
+            form = StudentForm(request.POST, instance=student)
+            if form.is_valid():
+                new_student=form.save()
+
+                if new_student.mode != 'Online':
+                   return redirect('learner_enrol', student.id)
+                else:
+                    OnlineLearner.objects.create(person=student.person)
+
+                return redirect('home')
+        else:
+            form = StudentForm(instance=student)
+
+        return render(request, 'register/addperson.html', context={"form": form})
     else:
-        form = StudentForm(instance=student)
-        # persons = Person.objects.filter(category="L")
-      
-        # form.fields['person'].queryset = persons
-
-    return render(request, 'register/addperson.html', context={"form": form})
-
+        messages.warning(request, 'Request not allowed !!')
+        return redirect('home')
 
 
 
@@ -122,6 +148,7 @@ def lessons (request):
                     lesson=form.save()
 
                     onlinelesson, created =OnlineLesson.objects.get_or_create(lesson=lesson)
+
                     return redirect("onlinelesson", onlinelesson.id )
                 else:
 
@@ -130,26 +157,37 @@ def lessons (request):
         else:
             form = LessonForm(initial={'user':user})
             persons = Person.objects.filter(category="T")
-            form.fields['teacher'].queryset = persons
+            if persons:
+                    form.fields['teacher'].queryset = persons
+
+            else:
+                    messages.info(request,'No teacher exist. You can register ')
+                    return redirect('register_person')        
     else:
         return redirect('login')  
-    
     return render(request, 'register/lesson.html', {'form': form})
 
 
 
-
+#form to register new student as online
 
 def onlineclass(request,pk):
-    onlinelesson= OnlineLesson.objects.get(id=pk)
-    if request.method =="POST":
-        form = OnlineLessonForm(request.POST, instance=onlinelesson)
-        if form.is_valid():
-            form.save()
-            return redirect('viewlesson')
+    user=request.user
+    if user.is_staff:
+        onlinelesson= OnlineLesson.objects.get(id=pk)
+        if request.method =="POST":
+            form = OnlineLessonForm(request.POST, instance=onlinelesson)
+            if form.is_valid():
+                form.save()
+                return redirect('viewlesson')
+        else:
+            form = OnlineLessonForm(instance=onlinelesson)
+
+        return render(request, 'register/onlineform.html', {'form':form})
     else:
-        form = OnlineLessonForm(instance=onlinelesson)
-    return render(request, 'register/onlineform.html', {'form':form})
+        messages.warning(request, 'Request not allowed !!')
+        return redirect('home')
+    
 
 
 def lesson_edit(request, pk):
@@ -180,7 +218,11 @@ def lesson_edit(request, pk):
             else:
                 form = LessonForm(instance=lesson)
                 persons = Person.objects.filter(category="T")
-                form.fields['teacher'].queryset = persons
+                if persons:
+                    form.fields['teacher'].queryset = persons
+                else:
+                    messages.info(request,'No teacher exist')
+                    return redirect('register_person')
         else:
             messages.warning(request,'This lesson is already taught, add another lesson to continue')
 
@@ -225,31 +267,37 @@ def view_lesson(request, pk):
 
 
 def mark_attendance(request, pk):
+    user=request.user
     attendance = get_object_or_404(Attendance, id=pk)
-    if attendance.classday.lesson.valid == True:
-        if attendance.in_attendance == False:
-            attendance.in_attendance = True
-            attendance.save()
+    if attendance.classday.lesson.user == user:
+        if attendance.student.mode  != 'Online':
+            if attendance.classday.lesson.valid == True:
+                if attendance.in_attendance == False:
+                    attendance.in_attendance = True
+                    attendance.save()
 
-            try:
-                student = attendance.students
-                student.att_count += 1  
-                student.save()
-            except Student.DoesNotExist:
-                pass
+                    try:
+                        student = attendance.students
+                        student.att_count += 1  
+                        student.save()
+                    except Student.DoesNotExist:
+                        pass
 
+                else:
+                    attendance.in_attendance = False
+                    attendance.save()
+
+                    try:
+                        student = attendance.students
+                        student.att_count -= 1  
+                        student.save()
+                    except Student.DoesNotExist:
+                        pass
+            else:
+                messages.warning(request, "You can not be able to mark the attendance,")
         else:
-            attendance.in_attendance = False
-            attendance.save()
-
-            try:
-                student = attendance.students
-                student.att_count -= 1  
-                student.save()
-            except Student.DoesNotExist:
-                pass
-    else:
-        messages.warning(request, "You can not be able to mark the attendance,")
+            messages.warning(request, "You cannot be able to Mark attendance for online class. The learner MUST be loged in with his/her credentials")
+   
     return redirect('details', attendance.classday.lesson.id)
 
 
@@ -292,20 +340,21 @@ def comment(request, pk):
 
 
 
-def enrol_learner(request, pk):
+def learner_in_class (request, pk):
     lesson = LessonTopic.objects.get(id=pk)
     classday=get_object_or_404(ClassDay, lesson=lesson)
-    students=Student.objects.filter(levels=lesson.levels, mode=lesson.mode)
+    students=Student.objects.filter(levels=lesson.levels, mode=lesson.mode, is_enrolled=True)
   
     if students:
         
         for student in students:
-            Attendance.objects.get_or_create(classday=classday, students=student)
+            Attendance.objects.get_or_create(classday=classday, student=student)
                               
     else:
         messages.warning(request, "Check if the learner's details have been added correctly")
 
     return redirect("details", lesson.id)
+
 
 
 def report(request):
@@ -327,6 +376,100 @@ def attendance_summary(request):
     return render(request, 'register/attendance_summury.html', {'class_days': class_days})
 
 
+def register_online(request, pk):
+    user=request.user
+    
+    if user.is_authenticated:
+        try:
+            
+            person=Person.objects.get(id=pk)
+            OnlineLearner.objects.get(user=user, person=person)
+
+            if person:
+                try:
+                    online_learner= get_object_or_404(OnlineLearner, person=person)
+                    online_learner.user=user
+                    online_learner.save()
+
+                    student=Student.objects.get(person=person)
+                    student.is_enrolled= True
+                    student.save()
+
+
+                    messages.success(request, f'Welcome back ( {user}, Name: {person}) select Lesson to continue')
+                    return redirect('viewlesson') 
+
+
+                except OnlineLearner.DoesNotExist:
+                    messages.warning(request, 'Please register for online classes with credentials')
+                    return redirect('register_person')
+            else:
+                messages.warning(request," Person is not registerd for online classes" )
+            
+        except OnlineLearner.DoesNotExist:
+            messages.warning(request,f" User not allowed to use {person}, you are logged in as {user}. if you are Online Learner login with your credentials"  )
+   
+    return redirect('home')
+
+
+def join_online(request, pk):
+    user = request.user
+
+    if user.is_authenticated:
+        lesson = get_object_or_404(LessonTopic, id=pk)
+        classday = get_object_or_404(ClassDay, lesson=lesson)
+        online = get_object_or_404(OnlineLesson, lesson=lesson)
+        try:
+            online_learner = OnlineLearner.objects.get(user=user)
+            student=Student.objects.get(person=online_learner.person)
+            attendance = get_object_or_404(Attendance, classday=classday, student= student)
+            if attendance.classday.lesson.valid and not attendance.in_attendance:
+                attendance.in_attendance = True
+                attendance.save()
+                try:
+                    student = attendance.student
+                    student.att_count += 1  
+                    student.save()
+                except Student.DoesNotExist:
+                    pass
+            return redirect('videoview', online.id)
+        except OnlineLearner.DoesNotExist:
+            return redirect('viewlesson' )
+    else:
+        messages.warning(request, 'Yo are not authenticated, Please log in to continue')
+        return redirect('login')
+
+
+
+
+
+
+# def online_attendance(request, pk):
+#     user=request.user
+#     lesson = get_object_or_404(LessonTopic, id=pk)
+#     classday = get_object_or_404(ClassDay, lesson=lesson)
+#     if request.method == "POST":
+#         form = AttendaceForm(request.POST, initial={"classday": classday})
+#         if form.is_valid():
+#             person = form.cleaned_data['person']
+            
+#             form.save()
+#             OnlineLearner.objects.create(user=request.user, person=person)
+#             return redirect('join_online', lesson.id)
+#         else:
+#             messages.warning(request, 'Invalid response, please consult your administrator')
+#             return redirect('viewlesson')
+#     else:
+#         form = AttendaceForm(initial={"classday": classday})
+#         students = Student.objects.filter(mode="Online")
+#         if students:
+#             form.fields['students'].queryset = students
+#         else:
+#             messages.info(request, 'No online student has been registered')
+#             return redirect('register_person')
+#         return render(request, 'register/join_online.html', {'form': form})
+
+    
 
 
 def view_video(request, pk):

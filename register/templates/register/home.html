@@ -19,7 +19,7 @@
         <th scope="col"><small>S/no</small></th>
         <th scope="col"><small>Name</small></th>
         <th scope="col"><small>Local Church</small></th>
-        {% comment %} <th scope="col"><small>Attendance</small></th> {% endcomment %}
+         <th scope="col"><small>Category</small></th> 
       </tr>
     </thead>
     <tbody>
@@ -37,13 +37,14 @@
           >
         </td>
         <td><small>{{ person.Local_church }}</small></td>
-        {% comment %} <td>
-          {% if person.category=="L" %}
-          <small>{{ person.student.att_count }}</small>
-          {% else %}
-          <small>N/a</small>
-          {% endif %}
-        </td> {% endcomment %}
+        {% if person.category == 'L' %}
+          <td><span class="badge bg-primary rounded-pill"><small>Leaner</small></span></td>
+        {% elif person.category == 'T' %}
+          <td><span class="badge bg-success rounded-pill"><small>Teacher</small></span></td>
+        {% else%}
+            <td><span class="badge bg-info rounded-pill"><small>Leader</small></span></td>
+
+        {% endif %}
       </tr>
       {% endfor %}
     </tbody>

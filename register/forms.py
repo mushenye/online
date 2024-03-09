@@ -2,7 +2,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import  LessonSummary, LessonTopic, OnlineLesson, Person, Student
+from .models import  Attendance, LessonSummary, LessonTopic, OnlineLesson, Person, Student
 
 
 
@@ -20,7 +20,7 @@ class StudentForm(ModelForm):
     class Meta:
         model= Student
         fields= '__all__'
-        exclude=['att_count',"person",]
+        exclude=['att_count','person','is_enrolled',]
 
 
 
@@ -73,4 +73,8 @@ class OnlineLessonForm(ModelForm):
         fields= '__all__'
 
 
+class AttendaceForm(ModelForm):
+    class Meta:
+        model=Attendance
+        fields= '__all__'
       

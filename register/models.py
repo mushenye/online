@@ -20,6 +20,7 @@ class Student(models.Model):
     levels = models.CharField(choices=LEVEL, max_length=100,blank=True, null=True)
     mode=models.CharField(choices=MODE, max_length=100, blank=True, null=True)
     att_count=models.IntegerField(default=0)
+    is_enrolled=models.BooleanField(default=False)
 
     def __str__(self):
          return f"{self.person.first_name} {self.person.other_name}"
@@ -72,15 +73,28 @@ class LessonSummary(models.Model):
 
 class Attendance(models.Model):
     classday = models.ForeignKey(ClassDay, on_delete=models.CASCADE)
-    students=models.ForeignKey(Student, on_delete=models.CASCADE)
+    student=models.ForeignKey(Student, on_delete=models.CASCADE)
     in_attendance=models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('classday', 'students')
+        unique_together = ('classday', 'student')
 
     def __str__(self):
         return f"{self.students.person.first_name} {self.students.person.other_name}"
     
+    
+class OnlineLearner(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE, blank=True, null=True )
+    person=models.ForeignKey(Person, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together=('user','person')
+
+
+    def __str__(self):
+        return self.user.username
+
+
 
 class Notice (models.Model):
     title=models.CharField(max_length=100)

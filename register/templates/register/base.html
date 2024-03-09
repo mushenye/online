@@ -49,10 +49,12 @@
     {% endfor %} 
     {% else%}
   
-
-     <h6 class="bg-dark text-white text-center p-2"> Logged in as : {{request.user}} || Welcome to Kariokor Monthly Meeting Catechism 2024 class</h6>
-    
-     
+     <h6 class="bg-dark text-white text-center p-2">
+      {% if user.is_authenticated%}
+      Logged in as : {{request.user}} |
+      {% endif %}
+      Welcome to Kariokor Monthly Meeting Catechism 2024 class</h6>
+ 
     {% endif %}
 <hr>
   

@@ -1,5 +1,4 @@
- {% extends "register/base.html"%}
-{% block main%}
+{% extends "register/base.html"%} {% block main%}
 
 <h6>Name:</h6>
 <h6>mode:</h6>
@@ -7,8 +6,12 @@
 <h6>Lesson att:</h6>
 <h6>attendance: {{student.att_count}}</h6>
 
+{% if student.mode == 'Online' %}
 
+<a class="btn btn-sm btn-success" href="{% url 'online_register' person.id %}">Online Class</a>
+{% endif %}
 
-
-<a class="btn btn-sm btn-success" href="{% url 'edit_person' person.id %}">Edit</a>
- {% endblock main %}
+<a class="btn btn-sm btn-success" href="{% url 'edit_person' person.id %}"
+  >Edit</a
+>
+{% endblock main %}

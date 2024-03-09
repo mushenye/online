@@ -1,62 +1,102 @@
-
-
-{% extends "register/base.html"%}
+{% extends "register/base.html"%} 
 {% block main%}
 
 <div class="container">
-<h4>details page</h4>
-
- 
+  <h4></h4>
 
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">{{lesson.topic}}</h5>
-      <hr>
-      <h6 class="card-subtitle mb-2 text-muted"> {{lesson.date_created}}</h6>
-      <p class="card-text text-italic">{{lesson.description}}.</p>
+      <table class="table table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">
+              <small class="card-title">{{lesson.topic.capitalize}}</small>
+            </th>
+            <th scope="col"><small>{{lesson.taught_on_date}}</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <p class="card-text">Teacher :</p>
+            </td>
+            <td>
+              <p class="card-text">{{lesson.teacher}}.</p>
+            </td>
+          </tr>
 
-      <h6 class="card-subtitle mb-2 text-muted"><strong>Lesson date</strong> : {{lesson.date}}</h6>
+          <tr>
+            <td>
+              <p class="card-text">Level :</p>
+            </td>
+            <td>
+              <p class="card-text">{{lesson.levels}}</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <small class="">{{lesson.description.capitalize}}</small>
 
-      <h6 class="card-subtitle mb-2 text-muted"><strong>Teacher</strong> : {{lesson.teacher}}</h6>
-      <h6 class="card-subtitle mb-2 text-muted"><strong>Date Created:</strong> {{lesson.date_created}} </h6>
-      <h6 class="card-subtitle mb-2 text-muted"><strong>Edited on:</strong> {{lesson.date_edited}}</h6>
-      <h6 class="card-subtitle mb-2 text-muted"><strong>Level:</strong> {{lesson.levels}}</h6>
-       {% if lesson.valid == True %}
-      <a href="{% url 'enrol' lesson.id %}" class="card-link btn btn-sm btn-success">Reflesh list</a>
-      {% endif %}
-      {% if lesson.mode == 'Online'%}
-      <a href="{% url 'videoview' lesson.id %}" class="card-link">View</a>
-      {% endif %}
+      {% if lesson.valid == True %} {% if user.is_staff %}
+      <a
+        href="{% url 'enrol' lesson.id %}"
+        class="card-link btn btn-sm btn-success"
+        >Reflesh list</a
+      >
+      {% endif %} {% if lesson.mode == 'Online'%}
 
+      <a href="{% url 'videoview' lesson.id %}" class="card-link">View </a>
 
+      {% else%}
+      <a href="{% url 'join_online' lesson.id %}" class="card-link"
+        >Join_lesson</a
+      >
+      {% endif %} {% endif %}
     </div>
   </div>
- {% if user.is_staff%}
-  
-  {% for item in attendance%}  
+  {% if user.is_staff%}
+  <h6>Learners List</h6>
+  <small> Click on the learner's name to mark the attendance</small>
 
- <ul class="list-group">
- <a class="text-decoration-none" href="{% url 'mark' item.id %}">
-  <li class="list-group-item ">
-    {% if item.in_attendance == True %}
-     <p class= "text-success"  >{{item.students.person.first_name.capitalize}} {{item.students.person.other_name.capitalize}}   </p>
-   {% else %}
-  <p class= "text-warning">{{item.students.person.first_name.capitalize}} {{item.students.person.other_name.capitalize}}   </p>
-   {% endif %}
-   
-  </li>
-</a>
-</ul>
-       
+  {% for item in attendance%}
 
-{%  empty %}
-<div class="card">
-<h4 class="text-center">No learners found </h4>
-      <a href="{% url 'home' %}" class="card-link btn btn-sm btn-success">View learner</a>
+  <ul class="list-group">
+    <a class="text-decoration-none" href="{% url 'mark' item.id %}">
+      <li class="list-group-item">
+        {% if item.in_attendance == True %}
+        <p class="text-success">
+          {{item.student.person.first_name.capitalize}}
+          {{item.student.person.other_name.capitalize}}
+        </p>
+        {% else %}
+        <p class="text-warning">
+          {{item.student.person.first_name.capitalize}}
+          {{item.student.person.other_name.capitalize}}
+        </p>
+        {% endif %}
+      </li>
+    </a>
+  </ul>
 
-      {% endfor%}
-      <a href="{% url 'closslesson' lesson.id %}" class="card-link btn btn-sm btn-success">End Lesson</a>
+  {% empty %}
+  <div class="card">
+    <h4 class="text-center">No learners found</h4>
+    <a href="{% url 'home' %}" class="card-link btn btn-sm btn-success"
+      >View learner</a
+    >
+
+    {% endfor%}
+    <small>
+      if you end the Lesson you will not be able to use it again. Please end the
+      lesson at the end of learning</small
+    >
+
+    <a
+      href="{% url 'closslesson' lesson.id %}"
+      class="card-link btn btn-sm btn-success"
+      >End Lesson</a
+    >
+  </div>
+  {% endif %}
 </div>
-{% endif %}
-</div>
- {% endblock main %}  
+{% endblock main %}
