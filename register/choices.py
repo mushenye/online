@@ -6,9 +6,10 @@ MODE = (
     )
 
 CATEGORY = (
-        ('L', 'Leaner'),
+        ('L', 'Learner'),
         ('T', 'Teacher'),
         ('P', 'Leader'),
+        ('M', 'Member'),
        
     )
 

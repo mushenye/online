@@ -1,0 +1,34 @@
+{% extends 'register/base.html'%}
+{% load crispy_forms_tags%} 
+{% load static%}
+
+
+{%block main%}
+<div class="container mt-3 ">
+
+    <div class="mb-3 mt-3">
+        <h3>Create Notice </h3>
+
+
+        <hr>
+
+
+            <form method ='post'  >
+                 {% csrf_token%}
+             
+                 <div class="form-control">
+                    {{ form|crispy}} 
+                
+                    <button class= "btn btn-sm btn-primary">Save</button>
+
+                    <a href="{% url 'notice'%}"class="btn btn-sm btn-primary">Add  notice</a>
+            
+
+                </div>
+        
+        </form>
+
+    </div>
+    
+</div>
+{%endblock main%}

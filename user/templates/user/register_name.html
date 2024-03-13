@@ -1,0 +1,96 @@
+{% extends 'register/base.html'%}
+{% load static %}
+
+
+{%block main%}
+
+<div>
+
+
+</div>
+
+
+<div class="container my-5 text-align-centre" >
+    <div class="row my-3 " >
+        <div class="col-sm-6 offset-sm-3">
+            <hr>
+            <h6 class="text-center">"Ensure you are login to be able to access your online classes" </h6>
+             <hr>
+            {% if request.user.is_authenticated %} 
+
+            <form action = "" method = "post" class=" row g-3" >
+                {% csrf_token %}
+                <div class="col-auto">
+                <label for="my_passcode" class="visually-hidden"> </label>
+                <input id="query" type="text" name="query" placeholder=" Your Name here" class="form-control">
+                </div>
+                 <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3">Search</button>
+                </div>
+            </form>
+            
+                
+        </div>
+    </div>
+  
+   
+ <p>Confirm your name please. If your doesnt exist consult your administrator</p>
+
+{% for item in persons %}
+    
+
+ <div class="row my-3 text-decoration-none text-center ">
+
+ 
+ <h3>{{item.first_name.capitalize}} {{item.other_name.capitalize}}</h3>
+<hr>
+
+<div>
+
+<a href="{% url 'mode'%}" class="btn btn-light btn-sm">Go Back</a>
+
+<a href="{% url 'online_register' person.id %}" class="btn btn-light btn-sm"><strong> Continue</strong></a>
+
+
+
+</div>
+ 
+
+
+
+</div>
+   <hr> 
+   
+ {% endfor%}
+{% else %}
+<h4><a href ={% url 'login' %}> Log in to continue</h4>
+{% endif %}
+
+
+
+<div class="container-fluid h-custom">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-md-9 col-lg-6 col-xl-5">
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+          class="img-fluid" alt="Sample image">
+      </div>
+
+      <div>
+       <hr>
+            <h5 class="text-center"><strong>  Welcome to our online classes.  </strong></h5>
+            
+            </h6>
+            <hr>
+      </div>
+
+</div>
+
+{%endblock main%}
+
+
+
+
+
+
+
+

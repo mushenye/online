@@ -1,0 +1,24 @@
+{% extends 'register/base.html' %}
+{% load static %}
+
+{% block main %}
+<div class="card m-3 p-4">
+    <h4 class=" text-center" >Select your category</h4>
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for code, label in category %}
+        <div class="form-check p-2" style="margin-left: 15px">
+            
+            <input type="radio" id="{{ code }}" name="query" value="{{ code }}">
+            <label for="{{ code }}"> <p>{{ label }} </p></label><br> 
+            
+       </div>
+            {% endfor %}
+        <button type="submit" class=" text-center m-4 btn btn-sm btn-success">Continue</button>
+       
+    </form>
+
+</div>
+{% endblock %}

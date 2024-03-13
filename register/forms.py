@@ -2,7 +2,7 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import  Attendance, LessonSummary, LessonTopic, OnlineLesson, Person, Student
+from .models import  Attendance, LessonSummary, LessonTopic, Notice, OnlineLesson, Person, Student
 
 
 
@@ -41,6 +41,17 @@ class CommentForm(ModelForm):
             self.fields['number_of_students'].widget = forms.HiddenInput()
 
 
+class NoticeForm(ModelForm):
+    class Meta:
+        model= Notice
+        fields=[
+         'title',
+        'description',
+        ]
+    # def __init__(self, *args, **kwargs):
+    
+    #     super(NoticeForm, self). __init__( *args, **kwargs)
+    #     for key, value in self.fields.items():
 
 
 
@@ -53,7 +64,7 @@ class LessonForm(ModelForm):
 
         model= LessonTopic
         fields= '__all__'
-        exclude=['is_taught','valid',]
+        exclude=['is_taught','valid', ' date_taught']
 
 
     def __init__(self, *args, **kwargs):

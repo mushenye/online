@@ -27,8 +27,10 @@ urlpatterns = [
     path('join/online/<int:pk>', views.join_online, name="join_online"),
     # path('online/attendance/<int:pk>', views.online_attendance, name="online_attendance"),
     path('online/register/<int:pk>', views.register_online, name="online_register"),
-
-
+    path('notice/' , views.create_notice, name= 'notice'),
+    path('notice/view/' , views.notice_view, name='view'),
+    path('notice/view/delete/<int:pk>', views.notice_delete, name='delete'),
+    path('notice/view/update/<int:pk>', views.notice_update, name= 'update')
 
 
 

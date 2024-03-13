@@ -38,9 +38,15 @@
         </td>
         <td><small>{{ person.Local_church }}</small></td>
         {% if person.category == 'L' %}
-          <td><span class="badge bg-primary rounded-pill"><small>Leaner</small></span></td>
+
+          <td><span class="badge bg-primary rounded-pill"><small>Leaner</small></span>
+          {% if student.mode == 'Online'%}
+          <a href="" >Join lesson</a>
+          {% endif %}
+          </td>
         {% elif person.category == 'T' %}
           <td><span class="badge bg-success rounded-pill"><small>Teacher</small></span></td>
+
         {% else%}
             <td><span class="badge bg-info rounded-pill"><small>Leader</small></span></td>
 

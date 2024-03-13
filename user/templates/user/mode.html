@@ -1,0 +1,25 @@
+{% extends 'register/base.html' %}
+{% load static %}
+
+{% block main %}
+<div class="card m-2 p-4">
+    <h4 class=" text-center" >Select your mode of learning</h4>
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for code, label in mode %}
+        <div class="form-check p-2" style="margin-left: 15px">
+            
+            <input type="radio" id="{{ code }}" name="query" value="{{ code }}">
+            <label for="{{ code }}"> <p>{{ label }} </p></label><br> 
+            
+       </div>
+            {% endfor %}
+          <a href="{% url 'category' %}"  class="text-decoration-none text-end"> Go back <a>  
+        <button type="submit" class=" text-center m-4 btn btn-sm btn-success">Continue</button>
+         
+    </form>
+
+</div>
+{% endblock %}

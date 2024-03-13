@@ -45,8 +45,8 @@
       >
       {% endif %} {% if lesson.mode == 'Online'%}
 
-      <a href="{% url 'videoview' lesson.id %}" class="card-link">View </a>
-
+      <a href="{% url 'videoview' lesson.id %}" class="card-link">View Lesson </a>
+      <a href="{% url 'videoview' lesson.id %}" class="card-link">View Report </a>
       {% else%}
       <a href="{% url 'join_online' lesson.id %}" class="card-link"
         >Join_lesson</a

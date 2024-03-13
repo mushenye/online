@@ -23,6 +23,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("register.urls")),
 
+    path('category/',user_views.category, name='category' ),
+    path('mode/',user_views.mode, name='mode' ),
+    path('online/myname/',user_views.search_name, name='my_name' ),
+    path('online/verify/<int:pk>',user_views.verify_online, name='verify_online' ),
+
+
     path('register/',user_views.register, name='register' ),
     path('accounts/profile/',user_views.userprofile, name='userprofile' ),
     path('accounts/login/',auth_views.LoginView.as_view(template_name='user/login.html'), name="login"),

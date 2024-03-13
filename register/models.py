@@ -38,6 +38,7 @@ class LessonTopic(models.Model):
     mode=models.CharField(choices=MODE, max_length=100, blank=True, null=True)
     is_taught= models.BooleanField(default=False)
     valid= models.BooleanField(default=True)
+    date_taught = models.DateField( blank=True, null=True)
 
 
     def __str__ (self):
@@ -80,7 +81,7 @@ class Attendance(models.Model):
         unique_together = ('classday', 'student')
 
     def __str__(self):
-        return f"{self.students.person.first_name} {self.students.person.other_name}"
+        return f"{self.student.person.first_name} {self.student.person.other_name}"
     
     
 class OnlineLearner(models.Model):
@@ -91,14 +92,17 @@ class OnlineLearner(models.Model):
         unique_together=('user','person')
 
 
+
+
+
+class Notice(models.Model):
+
+    date_created = models.DateField(auto_now_add=True,  blank=True, null=True)
+    title=models.CharField(max_length=50,blank=True, null=True)
+    description=models.TextField(max_length=200,blank=True, null=True)
+
     def __str__(self):
-        return self.user.username
-
-
-
-class Notice (models.Model):
-    title=models.CharField(max_length=100)
-    content=models.TextField()
+        return self.title
 
 
 class OnlineLesson(models.Model):

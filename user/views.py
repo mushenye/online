@@ -3,7 +3,10 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
+from register.choices import CATEGORY, LEVEL, MODE
+from register.models import OnlineLearner, Person
 from user.forms import  RegistrationForm
+from user.models import Tracer
 
 
 # Create your views here.
@@ -22,56 +25,128 @@ def register(request):
 
 
 def userprofile(request):
-    
-    
-        
+    tracer=Tracer.objects.create()
+      
     return render(request, "user/userprofile.html")
     
-# def userprofile(request):
-#     current_user = request.user
-#     email = current_user.email
-#     if current_user.is_authenticated:
-#         if email:
-#             # Create a Contact object if it does not exist or get the object
-#             contact, created = Contact.objects.get_or_create(user=current_user, email=email)
-#             if created:
-#                 messages.info(request, f'Welcome {current_user}, You are free to use our website')
-#                 mycontact = get_object_or_404(Contact, user=current_user)
-#                 form = ContactForm(instance=mycontact)
-#                 if request.method == 'POST':
-#                     form = ContactForm(request.POST, instance=mycontact)
-#                     if form.is_valid():
-#                         form.save()
-#                         email=form.cleaned_data.get('email')
-#                         messages.success(request,f"Your Email: {email} !!  ")
-#                         return redirect('viewproduct')    
-        
-#                 return render(request, 'mybiz/contact.html', {'form': form})
-#             else:
-               
-#                 return redirect('viewproduct')
-#         else:
-#             return redirect('register')
-#     else:
-#         return redirect('login')
+
+def category(request,Pk):
+    try:
+        tracer=Tracer.objects.get(id=Pk)
+        if tracer:
+            category = CATEGORY
+
+            query = request.POST.get("query")
+            if query == 'L':
+                mode= MODE
+                tracer.mode=query
+                tracer.save()
+                return redirect( 'mode', tracer.id)
+            
+            elif query == 'T':
+                tracer.mode=query
+                tracer.save()
+                return redirect('home')
+            elif query == 'P':
+                tracer.mode=query
+                tracer.save()
+                return redirect('home')
+            elif query == 'M':
+                tracer.mode=query
+                tracer.save()
+                return redirect( 'home')
+            else:
+                return render(request, 'user/category.html', {'category':category })
+    except Tracer.DoesNotExist:
+        messages.warning(request, 'You have not selected')
+        return redirect('userprofile')
+    
+
+def mode(request, pk):
+    try:
+        tracer=Tracer.objects.get(id=pk)
+        if tracer:
+            mode= MODE
+            query = request.POST.get("query")
+            if query == 'Online':
+                    tracer.mode=query
+                    tracer.save()
+                    return redirect( 'my_name',tracer.id)
+            elif query == 'Normal':
+                    return redirect('viewlesson')
+            elif query == 'SchoolBased':
+                    return redirect('')
+            elif query == 'Special':
+                return redirect( 'home')
+            else:
+                return render(request, 'user/mode.html', {'mode':mode})
+    except Tracer.DoesNotExist:
+        messages.warning(request, 'You have not selected')
+        return redirect('userprofile')   
+    
+
+def level (request, pk):
+    try:
+        tracer=Tracer.objects.get(id=pk)
+        if tracer:
+            level= LEVEL
+            query = request.POST.get("query")
+            if query == 'BK1':
+                tracer.level=query
+                return redirect()
+            else:
+                return redirect()
+
+        return render ()
+
+    except Tracer.DoesNotExist:
+            messages.warning(request, 'You have not selected')
+            return redirect('userprofile')  
 
 
-# def send_message(request,pk):
-#     user= request.user
-#     product=ProductImage.objects.get(id=pk)
-#     conversation, created = Conversation.objects.get_or_create( member=user, product=product)
-#     if Conversation:
-#         chat=Chat.objects.filter(product=product)
+@login_required
+def search_name(request):
+    user = request.user
+
+    try:
+        online_learner = OnlineLearner.objects.get(user=user)
+        if online_learner.person is not None:
+            return redirect('verify_online', online_learner.id)
+        else:
+            messages.warning(request, "Try to search by your name")
+            return render(request, 'user/register_name.html')
+    except OnlineLearner.DoesNotExist:
+        messages.warning(request, "Online learner object does not exist for this user") 
+
+        if request.method == 'POST':
+            query = request.POST.get("query", "")
+            
+            if query:
+                # Perform search based on the query
+                persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query))[:1]
+            
+                return render(request, 'user/register_name.html', {'persons': persons})
+            else:
+                messages.warning(request, "Empty search query, or your are not online learner")
+
+                return redirect( 'mode')
+
+        else:
+            return render(request, 'user/register_name.html')
 
 
-# def message_list(request):
-#     messages = Chat.objects.filter(Q(sender=request.user)).order_by('-created_at')
-#     return render(request, 'user/message_list.html', {'messages': messages})
+
+def verify_online(request, pk):
+    online_learner= get_object_or_404(OnlineLearner, id=pk)
+    person= Person.objects.get(id = online_learner.person.id)
+    return render(request, 'user/online_detail.html' ,
+                  {'online_learner':online_learner,
+                   'person':person}
+                  )
 
 
 
 @login_required
-
 def send_message(request, pk):
      pass
     # customer = request.user

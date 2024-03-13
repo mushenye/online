@@ -1,0 +1,42 @@
+{% extends 'register/base.html'%}
+{% load static %}
+{%block main%}
+<div class="container  p-2 ">
+    
+    <h3 class="bg-success text-white"> Notices</h3> 
+  
+     <a href="{% url 'notice' %}"class="btn btn-sm btn-primary">Create Notice</a>
+     <hr>
+    <div class="row">
+        
+
+            <div class="card-group ">
+
+             {% for notice in notices  %}
+                <div class="col-sm-4 p-3">    
+                    <div class="card"  >
+                            <div class="card-body">
+                                <h5 class="card-title">{{notice.title.capitalize}} </h5>
+                                <hr>
+                                <p class="card-text">{{notice.description}} </p>
+                                <hr>
+                               
+                                <div
+                                  class="card-text text-decoration-none"><small class="text-muted">{{notice.date_created}}</small>
+                                        <a href="{% url 'delete' notice.id %}"class="card-link">Delete</a>
+                                        <a href="{% url 'update' notice.id%}"class="card-link">Update</a>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                    {% endfor %}
+
+           
+         
+    </div>
+   </div>  
+       
+    
+</div>
+
+{%endblock main%}
