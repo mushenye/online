@@ -23,9 +23,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("register.urls")),
 
-    path('category/',user_views.category, name='category' ),
-    path('mode/',user_views.mode, name='mode' ),
-    path('online/myname/',user_views.search_name, name='my_name' ),
+
+    path('category/<int:pk>/tracer',user_views.category, name='category' ),
+    path('mode/<int:pk>/tracer',user_views.mode, name='mode' ),
+    path('level/<int:pk>/tracer',user_views.level, name='level' ),
+    path('online/myname/<int:pk>/search_name',user_views.search_name, name='my_name'),
+    path('normal/myname/<int:pk>/search_name_for/normal',user_views.search_name_normal, name='normal'),
     path('online/verify/<int:pk>',user_views.verify_online, name='verify_online' ),
 
 

@@ -1,0 +1,38 @@
+{% extends "register/base.html" %} 
+{% block main %}
+
+  <table class="table table-responsive">
+    <thead>
+      <tr>
+        <th scope="col"><small>S/no</small></th>
+        <th scope="col"><small>Lesson</small></th>
+        <th scope="col"><small>No.of Student</small></th>
+         <th scope="col"><small>Comment</small></th> 
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in lesson %}
+      <tr>
+        <td scope="row"><small>{{ forloop.counter }}</small></td>
+        <td>
+          <a
+            class="text-decoration-none"
+            href="#"
+            ><small
+              >
+              {{item.lesson.topic}}</small
+            ></a
+          >
+        </td>
+        <td><small>{{ item.number_of_students }}</small></td>
+        
+          
+         <td><small>{{ item.comment }}</small></td>
+
+        
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock main %}

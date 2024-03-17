@@ -21,7 +21,7 @@
           {% if user.is_authenticated%}
         <a class="nav-link" aria-current="page" href="{% url 'home'%}"><small>Home</small></a>
         <a class="nav-link" href="{% url 'register_person'%}"><small>Register</small></a>
-        <a class="nav-link" href="{% url 'viewlesson' %}"><small>Lesson</small></a>
+        {% comment %} <a class="nav-link" href="{% url 'viewlesson' %}"><small>Lesson</small></a> {% endcomment %}
         <a class="nav-link" href="{% url 'logout'%}"><small>logout</small></a>
 
         {% else%}

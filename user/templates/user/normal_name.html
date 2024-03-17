@@ -7,10 +7,8 @@
     <div class="col-sm-6 offset-sm-3">
       <hr />
       <h6 class="text-center">
-        "Ensure you are login to be able to access your online classes"
       </h6>
       <hr />
-      {% if request.user.is_authenticated %}
 
       <form action="" method="post" class="row g-3">
         {% csrf_token %}
@@ -46,28 +44,7 @@
 
     <div>
       <a
-        href="{% url 'online_register' item.person.id %}"
-        class="btn btn-light btn-sm"
-        ><strong> Continue</strong></a
-      >
-    </div>
-  </div>
-  <hr />
-
-  {% endfor%} 
-
-  {% for item in persons %}
-
-  <div class="row my-3 text-decoration-none text-center">
-    <h3>
-      {{item.first_name.capitalize}}
-      {{item.other_name.capitalize}}
-    </h3>
-    <hr />
-
-    <div>
-      <a
-        href="{% url 'viewlesson' item.id %}"
+        href="{% url 'viewlesson' item.person.id %}"
         class="btn btn-light btn-sm"
         ><strong> Continue</strong></a
       >
@@ -77,9 +54,7 @@
 
   {% endfor%} 
   
-  {% else %}
-  <h4><a href ={% url 'login' %}> Log in to continue</h4>
-  {% endif %}
+
 
   <div class="container-fluid h-custom">
     <div class="row d-flex justify-content-center align-items-center h-100">
@@ -94,7 +69,7 @@
       <div>
         <hr />
         <h5 class="text-center">
-          <strong> Welcome to our online classes. </strong>
+          <strong> Welcome to our classes. </strong>
         </h5>
 
         <hr />

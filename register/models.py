@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 
 class Person(models.Model):
+    date_created=models.DateField(auto_now_add=True, blank=True, null=True)
     first_name =models.CharField(max_length=100)
     other_name =models.CharField(max_length=100)
     Local_church=models.CharField(choices=CHURCH, max_length=100 )
@@ -20,6 +21,7 @@ class Student(models.Model):
     levels = models.CharField(choices=LEVEL, max_length=100,blank=True, null=True)
     mode=models.CharField(choices=MODE, max_length=100, blank=True, null=True)
     att_count=models.IntegerField(default=0)
+    attendance_percent=models.IntegerField(default=1)
     is_enrolled=models.BooleanField(default=False)
 
     def __str__(self):
@@ -61,14 +63,6 @@ class ClassDay(models.Model):
 
     def __str__ (self):
         return f"{self.lesson.topic} on {self.date_created}"
-    
-
-class LessonSummary(models.Model):
-    date_created = models.DateField(auto_now_add=True)
-    lesson=models.ForeignKey(LessonTopic, on_delete=models.CASCADE)
-    number_of_students=models.IntegerField()
-    comment=models.TextField(max_length=200, blank=True, null=True)
-
 
  
 
@@ -83,10 +77,21 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.student.person.first_name} {self.student.person.other_name}"
     
+
+
+
+class LessonSummary(models.Model):
+    date_created = models.DateField(auto_now_add=True)
+    lesson=models.ForeignKey(LessonTopic, on_delete=models.CASCADE)
+    number_of_students=models.IntegerField()
+    comment=models.TextField(max_length=200, blank=True, null=True)
+
+
     
-class OnlineLearner(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE, blank=True, null=True )
-    person=models.ForeignKey(Person, on_delete=models.CASCADE)
+    
+class OnlinePerson(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE, blank=True, null=True )
+    person=models.OneToOneField(Person, on_delete=models.CASCADE)
 
     class Meta:
         unique_together=('user','person')

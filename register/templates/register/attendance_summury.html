@@ -1,0 +1,33 @@
+{% extends "register/base.html" %} {% block main %}
+<section class="h-100 h-custom p-2" style="background-color: #eee">
+ 
+ 
+
+
+
+    <h1></h1>
+    <div class="list-group">
+        {% for class_day in class_days %}
+
+        <a href="{% url 'view_attendance' class_day.id  %}" class="list-group-item list-group-item-action" aria-current="true">
+            <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1"><h2>{{ class_day.lesson.topic.capitalize }}</h2></h5>
+            <small>{{class_day.lesson.date_created}}</small>
+            </div>
+            
+            <p class="mb-1">{{class_day.lesson.description}}</p>
+            <small>And some small print.</small>
+        </a>
+                {% comment %} {% for attendance_record in class_day.attendance_set.all %}
+            
+            <ul>
+
+                <li>{{ attendance_record.student.person.first_name }} {{ attendance_record.student.person.last_name }} - {% if attendance_record.in_attendance %}Present{% else %}Absent{% endif %}</li>
+                
+            </ul>
+       {% endfor %} {% endcomment %}
+        {% endfor %}
+    
+</div>
+</section>
+{% endblock main %}

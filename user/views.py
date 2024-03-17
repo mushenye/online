@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from register.choices import CATEGORY, LEVEL, MODE
-from register.models import OnlineLearner, Person
+from register.models import OnlinePerson, Person, Student
 from user.forms import  RegistrationForm
 from user.models import Tracer
 
@@ -27,36 +27,33 @@ def register(request):
 def userprofile(request):
     tracer=Tracer.objects.create()
       
-    return render(request, "user/userprofile.html")
+    return render(request, "user/userprofile.html" ,{'tracer': tracer})
     
 
-def category(request,Pk):
+def category(request,pk):
     try:
-        tracer=Tracer.objects.get(id=Pk)
+        tracer=Tracer.objects.get(id=pk)
         if tracer:
             category = CATEGORY
 
             query = request.POST.get("query")
             if query == 'L':
-                mode= MODE
-                tracer.mode=query
+                tracer.category=query
                 tracer.save()
                 return redirect( 'mode', tracer.id)
             
-            elif query == 'T':
-                tracer.mode=query
+            elif query == 'T' or query == 'P' :
+                tracer.category=query
                 tracer.save()
-                return redirect('home')
-            elif query == 'P':
-                tracer.mode=query
-                tracer.save()
-                return redirect('home')
+                return redirect('my_name', tracer.id)
+            
             elif query == 'M':
-                tracer.mode=query
+                tracer.category=query
                 tracer.save()
                 return redirect( 'home')
             else:
-                return render(request, 'user/category.html', {'category':category })
+                return render(request, 'user/category.html', {'category':category ,'tracer':tracer })
+            
     except Tracer.DoesNotExist:
         messages.warning(request, 'You have not selected')
         return redirect('userprofile')
@@ -64,83 +61,139 @@ def category(request,Pk):
 
 def mode(request, pk):
     try:
-        tracer=Tracer.objects.get(id=pk)
+        tracer = Tracer.objects.get(id=pk)
         if tracer:
-            mode= MODE
-            query = request.POST.get("query")
-            if query == 'Online':
-                    tracer.mode=query
+            mode = MODE  
+            if request.method == 'POST':
+                query = request.POST.get("query")
+                if query in ['Online', 'Normal', 'SchoolBased', 'Special']:
+                    tracer.mode = query
                     tracer.save()
-                    return redirect( 'my_name',tracer.id)
-            elif query == 'Normal':
-                    return redirect('viewlesson')
-            elif query == 'SchoolBased':
-                    return redirect('')
-            elif query == 'Special':
-                return redirect( 'home')
-            else:
-                return render(request, 'user/mode.html', {'mode':mode})
+                    return redirect('level', tracer.id)
+            return render(request, 'user/mode.html', {'mode': mode, 'tracer': tracer})
     except Tracer.DoesNotExist:
         messages.warning(request, 'You have not selected')
-        return redirect('userprofile')   
+        return redirect('userprofile')  
     
+
 
 def level (request, pk):
     try:
         tracer=Tracer.objects.get(id=pk)
         if tracer:
             level= LEVEL
-            query = request.POST.get("query")
-            if query == 'BK1':
-                tracer.level=query
-                return redirect()
-            else:
-                return redirect()
-
-        return render ()
-
+            if request.method == 'POST':
+                query = request.POST.get("query")
+                if query in ['BK1','BK2']:
+                    tracer.level=query
+                    tracer.save()
+                if tracer.mode != "Online":
+                    return redirect("normal",tracer.id) 
+                else:  
+                    return redirect('my_name',tracer.id)     
+            return render (request, 'user/level.html', {'level':level})        
     except Tracer.DoesNotExist:
             messages.warning(request, 'You have not selected')
             return redirect('userprofile')  
 
 
+
+
 @login_required
-def search_name(request):
+def search_name(request, pk):
     user = request.user
-
     try:
-        online_learner = OnlineLearner.objects.get(user=user)
-        if online_learner.person is not None:
-            return redirect('verify_online', online_learner.id)
-        else:
-            messages.warning(request, "Try to search by your name")
-            return render(request, 'user/register_name.html')
-    except OnlineLearner.DoesNotExist:
-        messages.warning(request, "Online learner object does not exist for this user") 
+        # to check if tracer object was generated 
+        tracer = get_object_or_404(Tracer, id=pk)
+        if tracer: 
+            try:
+                # check if online person exist
+                online_person = OnlinePerson.objects.get(user=user)
 
-        if request.method == 'POST':
-            query = request.POST.get("query", "")
-            
-            if query:
-                # Perform search based on the query
-                persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query))[:1]
-            
-                return render(request, 'user/register_name.html', {'persons': persons})
-            else:
-                messages.warning(request, "Empty search query, or your are not online learner")
+                if online_person.person is not None:
+                  
+                    if online_person.person.category== "L":
+                        student=Student.objects.get(person=online_person.person)
+                    
+                        if student.levels==tracer.level:
+                            return redirect('verify_online', online_person.id)
+                        else:
+                            messages.warning(request, 'We did not Verify you , Please try again ')
+                            return redirect('userprofile')
+                    else:
 
-                return redirect( 'mode')
+                        return redirect('viewlesson',online_person.person.id) 
+                      
+                     
+            except OnlinePerson.DoesNotExist:
+                if request.method == 'POST':
+                    query = request.POST.get("query", "")
+                    if query and not isinstance(query, int):
+                        # Perform search based on the query
 
-        else:
-            return render(request, 'user/register_name.html')
+                        persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query)).filter(category=tracer.category)[:1]
+                        # filter person based on category in the tracer object
+                        for person in persons:
+                            # return with the instance of person
+                            if person.category != 'L':
+                                return render(request, 'user/register_name.html', {'persons': persons})
+                            else:
+                                students = Student.objects.filter(person=person, mode=tracer.mode, levels=tracer.level) 
+                                if students:
+
+                                    return render(request, 'user/register_name.html', {'students': students})
+                            
+                                    
+                                else:
+                                    messages.warning(request, 'We Could not Verify you , Please try again ')
+                                    return redirect("userprofile")
+                    
+                                #return with insttance of student
+                            
+                    else:
+                        messages.warning(request, "Empty search Not allowed, or we could not verify you")
+                        return redirect('mode', tracer.id)
+                else:
+                    return render(request, 'user/register_name.html')
+                
+    except Tracer.DoesNotExist:
+        messages.warning(request, 'Wrong request made. Try again!')
+        return redirect('userprofile')
+
+
+
+def search_name_normal(request, pk):
+    try:
+        tracer = Tracer.objects.get(id=pk)
+        if tracer:  
+                if request.method == 'POST':
+                    query = request.POST.get("query", "")
+                    if query and not isinstance(query, int):
+                        persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query)).filter(category=tracer.category)[:1]
+                        for person in persons:
+                            students = Student.objects.filter(person=person, mode=tracer.mode, levels=tracer.level)
+                            if students is None:
+                                messages.warning(request, 'We Could not Verify you , Please try again ')
+                                return redirect("userprofile")
+                            return render(request, 'user/normal_name.html', {'students': students})
+                    else:
+                        messages.warning(request, "Empty search Not allowed, or we could not verify you")
+                        return redirect('mode', tracer.id)
+                else:
+                    return render(request, 'user/normal_name.html') 
+        return render(request, 'user/normal_name.html')
+    except Tracer.DoesNotExist:
+        messages.warning(request, 'Wrong request made. Try again!')
+        return redirect('userprofile')
 
 
 
 def verify_online(request, pk):
-    online_learner= get_object_or_404(OnlineLearner, id=pk)
-    person= Person.objects.get(id = online_learner.person.id)
+    online_person= get_object_or_404(OnlinePerson, id=pk)
+    person= Person.objects.get(id = online_person.person.id)
+
     return render(request, 'user/online_detail.html' ,
-                  {'online_learner':online_learner,
+                  {'online_person':online_person,
                    'person':person}
                   )
 

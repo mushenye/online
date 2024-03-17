@@ -1,59 +1,82 @@
 {% extends "register/base.html" %} 
 {% block main %}
 <section class="h-100 h-custom p-2" style="background-color: #eee">
-  <div class="card m-2">
-    <form method="post">
-      {% csrf_token %}
-      <button class="btn btn-sm btn-light" type="submit" name="query" value="L">
-        Learners
-      </button>
-      <button class="btn btn-sm btn-light" type="submit" name="query" value="T">
-        Teachers
-      </button>
-    </form>
-  </div>
 
-  <table class="table table-responsive">
+
+  <table class="table">
     <thead>
       <tr>
-        <th scope="col"><small>S/no</small></th>
+        {% comment %} <th scope="col"><small>S/no</small></th> {% endcomment %}
         <th scope="col"><small>Name</small></th>
         <th scope="col"><small>Local Church</small></th>
-         <th scope="col"><small>Category</small></th> 
+        <th scope="col"><small>Mode</small></th> 
+        <th scope="col"><small>Level</small></th> 
+
+
+         <th scope="col"><small>Attend ance</small></th> 
       </tr>
     </thead>
     <tbody>
-      {% for person in persons %}
+      {% for student in page_obj %}
       <tr>
-        <td scope="row"><small>{{ forloop.counter }}</small></td>
+        {% comment %} <td scope="row"><small>{{ forloop.counter }}</small></td> {% endcomment %}
         <td>
           <a
             class="text-decoration-none"
-            href="{% url 'person_details' person.id %}"
+            href="{% url 'person_details' student.person.id %}"
             ><small
-              >{{ person.first_name.capitalize }} 
-              {{person.other_name.capitalize}}</small
+              >{{ student.person.first_name.capitalize }} 
+              {{student.person.other_name.capitalize}}</small
             ></a
           >
         </td>
-        <td><small>{{ person.Local_church }}</small></td>
-        {% if person.category == 'L' %}
+        <td><small>{{ student.person.Local_church}}</small></td>
+            <td><small>{{ student.mode}}</small></td>
+          <td><small>{{ student.levels}}</small></td>
+          <td>   {{student.attendance_percent}} % </td>
+   
 
-          <td><span class="badge bg-primary rounded-pill"><small>Leaner</small></span>
-          {% if student.mode == 'Online'%}
-          <a href="" >Join lesson</a>
-          {% endif %}
-          </td>
-        {% elif person.category == 'T' %}
-          <td><span class="badge bg-success rounded-pill"><small>Teacher</small></span></td>
-
-        {% else%}
-            <td><span class="badge bg-info rounded-pill"><small>Leader</small></span></td>
-
-        {% endif %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
+<div class="pagination  bg-light text-center p-2 mt-5 text-white">
+    <span class="step-links text-center">
+      {% comment %} {% if is_paginated %}  {% endcomment %}
+      {% if page_obj.has_previous %}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page=1"><small> First</small></a>
+      <a
+        class="btn btn-sm  btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.previous_page_number}}"
+        >  <small>Previous</small>
+      </a>
+      {% endif %} {% for num in page_obj.paginator.page_range %} 
+      {% if page_obj.number == num %}
+
+      <a class="btn btn-sm btn-info mb-4 text-dark" href="?page={{ num }}"
+        ><small>{{ num }}</small></a
+      >
+
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3'%}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page={{num }}"
+        ><small>{{ num }}</small></a
+      >
+      {% endif %} {% endfor %} {% if page_obj.has_next %}
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.next_page_number}}"
+        ><small>Next</small></a
+      >
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{ page_obj.paginator.num_pages}}"
+        ><small>Last</small></a
+      >
+      {% endif %} 
+      {% comment %} {% endif %} {% endcomment %}
+    </span>
+  </div>
+
+
 </section>
 {% endblock main %}

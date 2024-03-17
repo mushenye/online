@@ -1,12 +1,29 @@
-{% extends "register/base.html"%}
-{% block main%}
-<a class= "btn btn-primary" href="#" >#</a>
-<a class= "btn btn-primary" href="#" > #</a>
-    {% for person in attendance%}
-    <ul>
-      <li>
-       <a href="{% url 'mark' person.id %}" >{{forloop.counter}}. {{person.students.person}}</a>
-      </li>
-    </ul>
-    {% endfor%}
- {% endblock main %}
+{% extends "register/base.html" %} {% block main %}
+<section class="h-100 h-custom p-2" style="background-color: #eee">
+ 
+<h4>Attendance Register  {{ class_day }}</h4>
+
+<a href="{% url 'classes-list' %}" class="text-decoration-none">Go back</a>
+  <table class="table table-responsive">
+    
+    
+        <thead>
+            <tr>
+              <th>S/N</th>
+
+                <th>Student Name</th>
+                <th>Attendance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{forloop.counter}}</td>
+                <td>{{ record.student.person.first_name }} {{ record.student.person.other_name }}</td>
+                <td>{% if record.in_attendance %}Present{% else %}Absent{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+  </table>
+</section>
+{% endblock main %}

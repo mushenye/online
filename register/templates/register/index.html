@@ -1,0 +1,38 @@
+{% extends "register/base.html"%}
+{% load crispy_forms_tags%} 
+{% load static %}
+{% block main %}
+
+
+
+ <form class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+ <h6></h6>
+<div class="card p-2 m-2">
+<ul class="list-group">
+    <li class="list-group-item " ><a  class="text-decoration-none " href="{% url 'userprofile'%}" ><h4>Check In</h4></a></li>
+  <li class="list-group-item " ><a  class="text-decoration-none " href="{% url 'person-list'%}" ><h4>Learner List</h4></a></li>
+  <li class="list-group-item"><a  class="text-decoration-none " href="{% url 'lesson_summary'%}" ><h4>Lessons Summary </h4></a></li>
+  <li class="list-group-item"><a  class="text-decoration-none " href="{% url 'classes-list'%}" ><h4>Attendance Report</h4></a></li>
+  <li class="list-group-item"><a  class="text-decoration-none " href="#" ><h4>Progress Report</h4></a></li>
+  <li class="list-group-item">
+  <a class="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+           <h4> Exams </h4>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="#">Book 1</a></li>
+            <li><a class="dropdown-item" href="#">Book 2</a></li>
+          </ul>
+        </li>
+    </li>
+</ul>
+</div>
+
+
+
+
+
+
+{% endblock%}

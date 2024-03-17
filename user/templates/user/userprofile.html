@@ -5,6 +5,15 @@
  <h1> WELCOME  </h1>
  <h1> Catechism class 2024  </h1>
 
- <a href="{% url 'category'%}" class="btn btn-sm btn-success"> Continiue</a>
+ <div class="card p-2 m-3">
+ <p > We would like to verify who you are ?</p>
+ <p>
+ <a href="#" class="btn btn-sm btn-success"> Member </a>
+
+  <a href="{% url 'category' tracer.id %}" class="btn btn-sm btn-success"> Continue</a>
+ </p>
+ </div>
+
+ 
  </div>
   {% endblock%}

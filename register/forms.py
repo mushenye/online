@@ -20,7 +20,7 @@ class StudentForm(ModelForm):
     class Meta:
         model= Student
         fields= '__all__'
-        exclude=['att_count','person','is_enrolled',]
+        exclude=['att_count','person','is_enrolled','attendance_percent',]
 
 
 
@@ -64,7 +64,7 @@ class LessonForm(ModelForm):
 
         model= LessonTopic
         fields= '__all__'
-        exclude=['is_taught','valid', ' date_taught']
+        exclude=['is_taught','valid', 'date_taught']
 
 
     def __init__(self, *args, **kwargs):

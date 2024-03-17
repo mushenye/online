@@ -2,20 +2,28 @@ from datetime import date, datetime
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.urls import reverse
 from register.forms import AttendaceForm, CommentForm, LessonForm, NoticeForm, OnlineLessonForm, PersonForm, StudentForm
-from register.models import Attendance, ClassDay, LessonSummary, LessonTopic, Notice, OnlineLearner, OnlineLesson, Person, Student
+from register.models import Attendance, ClassDay, LessonSummary, LessonTopic, Notice, OnlinePerson, OnlineLesson, Person, Student
 
 # Create your views here.
 
+def index(request):
 
-def home(request):
-    persons = Person.objects.all()
-    query = request.POST.get("query")
-    if query:
-        persons = persons.filter(category=query)
+    return render(request, 'register/index.html')
 
-    return render(request, "register/home.html", context={"persons": persons})
+
+def person_list(request):
+    students = Student.objects.all()
+    paginator = Paginator(students, 6)  
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, "register/home.html", context={
+        "students": students,
+        "page_obj": page_obj
+        })
 
 
 # def search (request):
@@ -67,6 +75,10 @@ def add_person(request):
                     person = form.save()
                     new_student = Student.objects.create(person=person)
                     return redirect('edit_student', new_student.id)
+                elif category == 'T':
+                    person = form.save()
+                    OnlinePerson.objects.create(person=person)
+                    return redirect('home')
                 else:
                     form.save()
                     return redirect('home')  
@@ -96,6 +108,11 @@ def edit_person(request, pk):
                     person = form.save() 
                     new_student, created = Student.objects.get_or_create(person=person)
                     return redirect('edit_student', new_student.id)
+                
+                elif category == 'T':
+                    person = form.save()
+                    OnlinePerson.objects.get_or_create(person=person)
+                    return redirect('home')
                 else:
                     form.save()
                     try:
@@ -122,18 +139,17 @@ def student(request,pk):
             form = StudentForm(request.POST, instance=student)
             if form.is_valid():
                 new_student=form.save()
+                try:
 
-                if new_student.mode != 'Online':
-                    try:
-                        online_learner =get_object_or_404(OnlineLearner, person=student.person)
+                    if new_student.mode != 'Online':
+                        online_learner =get_object_or_404(OnlinePerson, person=student.person)
                         online_learner.delete()
-                    except OnlineLearner.DoesNotExist:
-                        pass
+                        return redirect('learner_enrol', student.id)
+                    else: 
+                        OnlinePerson.objects.create(person=student.person) 
+                        return redirect('home')
+                except:
                     return redirect('learner_enrol', student.id)
-                else:
-                    OnlineLearner.objects.create(person=student.person)
-
-                return redirect('home')
         else:
             form = StudentForm(instance=student)
 
@@ -178,22 +194,22 @@ def lessons (request):
 
 #form to register new student as online
 
-def onlineclass(request,pk):
-    user=request.user
-    if user.is_staff:
-        onlinelesson= OnlineLesson.objects.get(id=pk)
-        if request.method =="POST":
-            form = OnlineLessonForm(request.POST, instance=onlinelesson)
-            if form.is_valid():
-                form.save()
-                return redirect('viewlesson')
-        else:
-            form = OnlineLessonForm(instance=onlinelesson)
+# def onlineclass(request,pk):
+#     user=request.user
+#     if user.is_staff:
+#         onlinelesson= OnlineLesson.objects.get(id=pk)
+#         if request.method =="POST":
+#             form = OnlineLessonForm(request.POST, instance=onlinelesson)
+#             if form.is_valid():
+#                 lesson=form.save()
+#                 return redirect('details',lesson.id )
+#         else:
+#             form = OnlineLessonForm(instance=onlinelesson)
 
-        return render(request, 'register/onlineform.html', {'form':form})
-    else:
-        messages.warning(request, 'Request not allowed !!')
-        return redirect('home')
+#         return render(request, 'register/onlineform.html', {'form':form})
+#     else:
+#         messages.warning(request, 'Request not allowed !!')
+#         return redirect('home')
     
 
 
@@ -210,11 +226,17 @@ def lesson_edit(request, pk):
                 form = LessonForm(request.POST, instance=lesson)
                 if form.is_valid():
                     mode= form.cleaned_data['mode']
+                    lesson= form.save(commit=False)
                     if mode== 'Online':
+                        lesson.valid= True
+                        lesson.is_taught =False
                         form.save()
+                    
                         onlinelesson, created= OnlineLesson.objects.get_or_create(lesson=lesson)
                         return redirect("onlinelesson", onlinelesson.id )
                     else:
+                        lesson.valid= True
+                        lesson.is_taught =False
                         form.save()
                         try:
                             onlinelesson = OnlineLesson.objects.get(lesson=lesson)
@@ -239,13 +261,21 @@ def lesson_edit(request, pk):
         return redirect( 'viewlesson')
 
 
-def view_lessons(request):
-    lessons = LessonTopic.objects.all().order_by("-date_created")
+def view_lessons(request, pk):
+    person=Person.objects.get(id=pk)
     today_date = date.today()
-    
-    valid_lessons = [lesson for lesson in lessons if lesson.taught_on_date < today_date]
+    if person.category != "L":
 
-    LessonTopic.objects.filter(id__in=[lesson.id for lesson in valid_lessons]).update(valid=False)
+        lessons = LessonTopic.objects.all().order_by("-date_created")
+        valid_lesson = [lesson for lesson in lessons if lesson.taught_on_date < today_date]
+        LessonTopic.objects.filter(id__in=[lesson.id for lesson in valid_lesson]).update(valid=False)
+
+    else:
+        student =Student.objects.get (person=person)
+        lessons = LessonTopic.objects.filter( levels=student.levels, mode =student.mode ).order_by("-date_created")
+        valid_lessons = [lesson for lesson in lessons if lesson.taught_on_date < today_date]
+        LessonTopic.objects.filter(id__in=[lesson.id for lesson in valid_lessons]).update(valid=False)
+
 
     return render(request, 'register/lesson_view.html', {'lessons': lessons})
 
@@ -264,11 +294,9 @@ def view_lesson(request, pk):
         else:
             return redirect("viewlesson")
         
-    attendance = Attendance.objects.filter(classday=classday)
-    # if attendance.filter(in_attendance=True):
-    #     lesson.is_taught=True
-    #     lesson.save()
-    return render(request, 'register/lesson_detail.html', {'lesson': lesson, 'attendance': attendance})
+    class_attendance = Attendance.objects.filter(classday=classday)
+  
+    return render(request, 'register/lesson_detail.html', {'lesson': lesson, 'class_attendance': class_attendance})
 
 
 
@@ -279,14 +307,17 @@ def mark_attendance(request, pk):
     attendance = get_object_or_404(Attendance, id=pk)
     if attendance.classday.lesson.user == user:
         if attendance.student.mode  != 'Online':
+            lesson=LessonTopic.objects.filter(levels=attendance.student.levels,  mode=attendance.student.mode).count()
+
             if attendance.classday.lesson.valid == True:
                 if attendance.in_attendance == False:
                     attendance.in_attendance = True
                     attendance.save()
 
                     try:
-                        student = attendance.students
-                        student.att_count += 1  
+                        student = attendance.student
+                        student.att_count += 1
+                        student.attendance_percent=( student.att_count/lesson * 100)
                         student.save()
                     except Student.DoesNotExist:
                         pass
@@ -296,8 +327,9 @@ def mark_attendance(request, pk):
                     attendance.save()
 
                     try:
-                        student = attendance.students
-                        student.att_count -= 1  
+                        student = attendance.student
+                        student.att_count -= 1 
+                        student.attendance_percent=( student.att_count/lesson * 100)
                         student.save()
                     except Student.DoesNotExist:
                         pass
@@ -329,7 +361,13 @@ def close_lesson(request, pk):
     else:
         return redirect('viewlesson')
 
-
+def lesson_summary(request):
+    
+    lesson=LessonSummary.objects.all()
+    
+    return render(request, 'register/lesson_summary.html' ,context={
+        'lesson':lesson
+    })
 
 
 def comment(request, pk):
@@ -355,9 +393,7 @@ def learner_in_class (request, pk):
     students=Student.objects.filter(levels=lesson.levels, mode=lesson.mode, is_enrolled=True)
     if students:
         for student in students:
-            Attendance.objects.get_or_create(classday=classday, student=student)
-
-                        
+            Attendance.objects.get_or_create(classday=classday, student=student)                
     else:
         messages.warning(request, "Check if the learner's details have been added correctly")
 
@@ -368,13 +404,14 @@ def learner_in_class (request, pk):
 def report(request):
     classday=ClassDay.objects.filter()
 
-
     return render(request, 'register/report.html', )
+
+
 
 
 def student_attendance(request,pk):
     student=get_object_or_404(Student, id=pk)
-    attendance=Attendance.objects.filter(in_attendance=True, students=student).count
+    attendance=Attendance.objects.filter(in_attendance=True, students=student).count()
     
     return render(request, 'register/report2.html', {'attendance': attendance})
 
@@ -382,33 +419,58 @@ def student_attendance(request,pk):
 
 def attendance_summary(request):
     class_days = ClassDay.objects.all().prefetch_related('attendance_set')
+    
     return render(request, 'register/attendance_summury.html', {'class_days': class_days})
+
+
+def view_attendance(request, pk):
+    class_day = get_object_or_404(ClassDay, pk=pk)
+    attendance_records = class_day.attendance_set.all()
+
+    return render(request, 'register/view_attendance.html', 
+                  {'class_day': class_day, 
+                   'attendance_records': attendance_records})
+
+
+
 
 
 def register_online(request, pk):
     user=request.user
     if user.is_authenticated:
-        person=Person.objects.get(id=pk) 
-        learner= get_object_or_404( OnlineLearner, person=person)
+        try:
+            person=Person.objects.get(id=pk)
 
-        if learner.user == user:
-            messages.success(request, f'Welcome back ( {user}, Name: {person}) select Lesson to continue')
-            return redirect('viewlesson')
-     
-        elif learner.user == None:
+            try:
+                learner= OnlinePerson.objects.get(person=person) 
+            except OnlinePerson.DoesNotExist:
+                messages.warning(request, "Person  does not exist, Consult your administrator")
+                return redirect('userprofile')
 
-            learner.user=user
-            learner.save()
+            if learner.user == user:
+                messages.success(request, f'Welcome back ( {user}, Name: {person}) select Lesson to continue')
+                return redirect('viewlesson', person.id)
+            
+            elif learner.user == None:
+                try:
+                    learner.user=user
+                    learner.save()
+                except:
+                    messages.warning(request, ' User with this Person already exists.')
+                    return redirect('userprofile')
 
-            student=Student.objects.get(person=person)
-            student.is_enrolled= True
-            student.save()
+                student=Student.objects.get(person=person)
+                student.is_enrolled= True
+                student.save()
 
-            messages.success(request, f'Welcome ( {user}, Name: {person}) select Lesson to continue')
-            return redirect('viewlesson')
-        else:
-            messages.warning(request, f' You can Not log in with  ( {user}, and  {person}) for online class')
-            return redirect ('home') 
+                messages.success(request, f'Welcome ( {user}, Name: {person}) select Lesson to continue')
+                return redirect('viewlesson', person.id)
+            else:
+                messages.warning(request, f' You can Not log in with  ( {user}, and  {person}) for online class')
+                return redirect ('userprofile')
+        except Person.DoesNotExist:
+            messages.warning(request, 'We could find the person, try another search')
+            return redirect('userprofile') 
     else:
         return redirect ('login')              
                    
@@ -423,20 +485,23 @@ def join_online(request, pk):
         classday = get_object_or_404(ClassDay, lesson=lesson)
         online = get_object_or_404(OnlineLesson, lesson=lesson)
         try:
-            online_learner = OnlineLearner.objects.get(user=user)
+            online_learner = OnlinePerson.objects.get(user=user)
             student=Student.objects.get(person=online_learner.person)
             attendance = get_object_or_404(Attendance, classday=classday, student= student)
             if attendance.classday.lesson.valid and not attendance.in_attendance:
+                lesson_count=LessonTopic.objects.filter(level=attendance.student.levels,  mode=attendance.student.mode).count()
+
                 attendance.in_attendance = True
                 attendance.save()
                 try:
                     student = attendance.student
                     student.att_count += 1  
+                    student.attendance_percent=( student.att_count/lesson_count * 100)
                     student.save()
                 except Student.DoesNotExist:
                     pass
             return redirect('videoview', online.id)
-        except OnlineLearner.DoesNotExist:
+        except OnlinePerson.DoesNotExist:
             messages.warning(request, 'Leaner does not Exist')
             return redirect('viewlesson' )
     else:
@@ -445,33 +510,6 @@ def join_online(request, pk):
 
 
 
-
-
-
-# def online_attendance(request, pk):
-#     user=request.user
-#     lesson = get_object_or_404(LessonTopic, id=pk)
-#     classday = get_object_or_404(ClassDay, lesson=lesson)
-#     if request.method == "POST":
-#         form = AttendaceForm(request.POST, initial={"classday": classday})
-#         if form.is_valid():
-#             person = form.cleaned_data['person']
-            
-#             form.save()
-#             OnlineLearner.objects.create(user=request.user, person=person)
-#             return redirect('join_online', lesson.id)
-#         else:
-#             messages.warning(request, 'Invalid response, please consult your administrator')
-#             return redirect('viewlesson')
-#     else:
-#         form = AttendaceForm(initial={"classday": classday})
-#         students = Student.objects.filter(mode="Online")
-#         if students:
-#             form.fields['students'].queryset = students
-#         else:
-#             messages.info(request, 'No online student has been registered')
-#             return redirect('register_person')
-#         return render(request, 'register/join_online.html', {'form': form})
 
     
 
@@ -534,3 +572,7 @@ def notice_delete(request,pk):
     notice=Notice.objects.get(id=pk)
     notice.delete()
     return redirect('view')
+
+
+
+

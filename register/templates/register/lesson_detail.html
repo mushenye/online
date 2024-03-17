@@ -58,7 +58,7 @@
   <h6>Learners List</h6>
   <small> Click on the learner's name to mark the attendance</small>
 
-  {% for item in attendance%}
+  {% for item in class_attendance%}
 
   <ul class="list-group">
     <a class="text-decoration-none" href="{% url 'mark' item.id %}">

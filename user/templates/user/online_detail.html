@@ -1,34 +1,41 @@
-{% extends 'register/base.html' %}
-{% load static %}
+{% extends 'register/base.html' %} {% load static %} {% block main %}
+<div class="row my-3 text-decoration-none text-center">
+  <div class="card p-2 ">
+    <h4>
+      Name: {{person.first_name.capitalize}} {{person.other_name.capitalize}}
+    </h4>
+    <h4>User Name: {{user.username}}</h4>
+    <hr />
 
-{% block main %}
-<div class="card p-2 m-3">
-    <h1 class=" text-center" ></h1>
-    <hr>
-    User Name: {{user.username}}
     Email : {{user.email}}
-    <hr>
-    Name: {{ person}}
-    <hr>
-</div>
-<a href="{% url 'mode'%}" class="btn btn-light btn-sm">Go Back</a>
+  </div>
+<h2>
+  <a href="{% url 'userprofile' %}" class="btn btn-light btn-sm">Go Back</a>
 
-<a href="{% url 'online_register' person.id %}" class="btn btn-light btn-sm"><strong> Continue</strong></a>
-
+  <a href="{% url 'viewlesson' person.id %}" class="btn btn-light btn-sm"
+    ><strong> Continue</strong></a
+  >
+</h2>
   <div class="container-fluid h-custom">
     <div class="row d-flex justify-content-center align-items-center h-100">
       <div class="col-md-9 col-lg-6 col-xl-5">
-        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-          class="img-fluid" alt="Sample image">
+        <img
+          src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+          class="img-fluid"
+          alt="Sample image"
+        />
       </div>
 
       <div>
-       <hr>
-            <h5 class="text-center"><strong>  Welcome to our online classes.  </strong></h5>
-            
-            </h6>
-            <hr>
+        <hr />
+        <h5 class="text-center">
+          <strong> Welcome to our online classes. </strong>
+        </h5>
+
+        <hr />
       </div>
+    </div>
 
-
-{% endblock %}
+    {% endblock %}
+  </div>
+</div>
