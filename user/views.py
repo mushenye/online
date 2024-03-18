@@ -4,8 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
 from register.choices import CATEGORY, LEVEL, MODE
+from register.forms import PersonForm
 from register.models import OnlinePerson, Person, Student
-from user.forms import  RegistrationForm
+from user.forms import  RegistrationForm, SelfPersonForm
 from user.models import Tracer
 
 
@@ -55,7 +56,7 @@ def category(request,pk):
                 return render(request, 'user/category.html', {'category':category ,'tracer':tracer })
             
     except Tracer.DoesNotExist:
-        messages.warning(request, 'You have not selected')
+        messages.warning(request, 'You have not selected Category, we could not verify who you are')
         return redirect('userprofile')
     
 
@@ -72,9 +73,20 @@ def mode(request, pk):
                     return redirect('level', tracer.id)
             return render(request, 'user/mode.html', {'mode': mode, 'tracer': tracer})
     except Tracer.DoesNotExist:
-        messages.warning(request, 'You have not selected')
+        messages.warning(request, 'You have not selected mode, we could not verify who you are')
         return redirect('userprofile')  
-    
+  
+
+def self_registration(request):
+        if request.method == "POST":
+            form = SelfPersonForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('home')
+        else:
+            form = SelfPersonForm()
+        return render(request, 'register/addperson.html', context={"form": form})
+
 
 
 def level (request, pk):
@@ -91,9 +103,9 @@ def level (request, pk):
                     return redirect("normal",tracer.id) 
                 else:  
                     return redirect('my_name',tracer.id)     
-            return render (request, 'user/level.html', {'level':level})        
+            return render (request, 'user/level.html', {'level':level, 'tracer':tracer})        
     except Tracer.DoesNotExist:
-            messages.warning(request, 'You have not selected')
+            messages.warning(request, 'You have not selected level, we could not verify who you are')
             return redirect('userprofile')  
 
 
@@ -160,7 +172,10 @@ def search_name(request, pk):
         messages.warning(request, 'Wrong request made. Try again!')
         return redirect('userprofile')
 
-
+def delete_tracer(request,pk):
+    tracer=Tracer.objects.get(id=pk)
+    tracer.delete()
+    return redirect('home')
 
 def search_name_normal(request, pk):
     try:

@@ -16,8 +16,12 @@
             
        </div>
             {% endfor %}
-        <button type="submit" class=" text-center m-4 btn btn-sm btn-success">Continue</button>
-         
+    <div class=" card text-center">
+        <h4>
+    <a href="{% url 'tracer_delete' tracer.id %}" class="btn btn-sm btn-warning"> Exit </a>
+    <button type="submit" class="text-center m-4 btn btn-sm btn-primary">
+      Proceed
+    </button> </h4>         
     </form>
           {% comment %} <a href="{% url 'category' tracer.id  %}"  class="text-decoration-none text-end"> Go back <a>   {% endcomment %}
 

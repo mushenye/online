@@ -1,19 +1,19 @@
-{% extends 'register/base.html' %}  
-{% load static %}
- {%block main%}
- <div class="card text-center">
- <h1> WELCOME  </h1>
- <h1> Catechism class 2024  </h1>
+{% extends 'user/base.html' %} {% load static %} {%block main%}
+<div class="card text-center">
+  <img  style="text-align:center; height:100px ; width:100px;"src="{% static '/register/images/logo.png'  %}" />
 
- <div class="card p-2 m-3">
- <p > We would like to verify who you are ?</p>
- <p>
- <a href="#" class="btn btn-sm btn-success"> Member </a>
+  <h1>WELCOME</h1>
+  <h1>Catechism class 2024</h1>
 
-  <a href="{% url 'category' tracer.id %}" class="btn btn-sm btn-success"> Continue</a>
- </p>
- </div>
+  <div class="card p-2 m-3">
+    <p>We would like to verify who you are ?</p>
+    <p>
+      <a href="{% url 'self-register'%}" class="btn btn-sm btn-success"> Register </a>
 
- 
- </div>
-  {% endblock%}
+      <a href="{% url 'category' tracer.id %}" class="btn btn-sm btn-success">
+        Proceed</a
+      >
+    </p>
+  </div>
+</div>
+{% endblock%}

@@ -1,15 +1,19 @@
-{% extends 'register/base.html' %}  
+{% extends 'user/base.html' %}  
 {% load static %}
  {%block information%} LOGGED OUT  {%endblock information %}
-{%block main-content%}
-<div class="container">
-  <h1> <img style="height: 40px" src="{% static 'mybiz/image/logo.png'%}" />| You are logged out </h1>
+{%block main%}
+<hr>
+<div class="container" >
+<div class="card p-2 m-2 text-center">
+
+  <h4 > You are logged out </h4>
     
     <div class="border-top pt-3">
-    
+     
         
         <a class="ml-5" href="{% url 'login' %}"> <strong>Sign in  </strong> </a> 
         
     </div>
   </div>
-  {% endblock main-content%}
+  </div>
+  {% endblock main%}

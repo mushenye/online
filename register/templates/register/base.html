@@ -1,4 +1,5 @@
-<!doctype html>
+<!Doctype html>
+{% load static %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -47,13 +48,15 @@
     </div>
 
     {% endfor %} 
-    {% else%}
   
-     <h6 class="bg-dark text-white text-center p-2">
-      {% if user.is_authenticated%}
-      Logged in as : {{request.user}} |
-      {% endif %}
-      Welcome to Kariokor Monthly Meeting Catechism 2024 class</h6>
+    {% else%}
+
+      <div style="background-color: blue; height: 30px; color:white;gap:10px;">
+
+    <img style="height:30px " src="{% static 'register/images/logo2.jpg'%}" />
+      <span> {{request.user}}</span>
+    </div>
+
  
     {% endif %}
 <hr>

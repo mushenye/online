@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from user import views as user_views
@@ -30,7 +32,9 @@ urlpatterns = [
     path('online/myname/<int:pk>/search_name',user_views.search_name, name='my_name'),
     path('normal/myname/<int:pk>/search_name_for/normal',user_views.search_name_normal, name='normal'),
     path('online/verify/<int:pk>',user_views.verify_online, name='verify_online' ),
+    path('self/registration/',user_views.self_registration, name='self-register' ),
 
+    path('tracer/delete/<int:pk>/tracer',user_views.delete_tracer, name='tracer_delete' ),
 
     path('register/',user_views.register, name='register' ),
     path('accounts/profile/',user_views.userprofile, name='userprofile' ),
@@ -38,4 +42,8 @@ urlpatterns = [
     path('logout/',auth_views.LogoutView.as_view(template_name='user/logout.html'), name="logout"),
     path('messages/send/<int:pk>/', user_views.send_message, name='send_message'),
 
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+admin.site.site_header= "Simani Technologies"
+admin.site.site_title= "Simani Technologies"
+admin.site.site_index_title = "welcome to simani technologies"

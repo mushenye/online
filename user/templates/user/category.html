@@ -1,7 +1,8 @@
-{% extends 'register/base.html' %} 
+{% extends 'user/base.html' %} 
 {% load static %} 
 {% block main %}
-<div class="card m-3 p-4">
+<div class="container justify-content-center align-items-center ">
+<div class="card m-3 p-4 " style="width:25rem; margin:auto;">
   <h4 class="text-center">Select your category</h4>
   <hr />
 
@@ -12,9 +13,17 @@
       <label for="{{ code }}"> <p>{{ label }}</p></label><br />
     </div>
     {% endfor %}
-    <button type="submit" class="text-center m-4 btn btn-sm btn-success">
-      Continue
-    </button>
+    <div class=" card text-center">
+        <h4>
+        <a href="{% url 'tracer_delete' tracer.id %}" class="btn btn-sm btn-warning"> Exit </a>
+    <button type="submit" class="text-center m-4 btn btn-sm btn-primary">
+      Proceed
+
+    </button> </h4>
+
+</div>
   </form>
+
+</div>
 </div>
 {% endblock %}

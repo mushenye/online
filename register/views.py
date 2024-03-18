@@ -106,6 +106,7 @@ def edit_person(request, pk):
                 category = form.cleaned_data['category']
                 if category == 'L':
                     person = form.save() 
+
                     new_student, created = Student.objects.get_or_create(person=person)
                     return redirect('edit_student', new_student.id)
                 
@@ -444,7 +445,7 @@ def register_online(request, pk):
             try:
                 learner= OnlinePerson.objects.get(person=person) 
             except OnlinePerson.DoesNotExist:
-                messages.warning(request, "Person  does not exist, Consult your administrator")
+                messages.warning(request, "We couldn't verify who you are, check your login details or consult your administrator")
                 return redirect('userprofile')
 
             if learner.user == user:

@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+from user.models import Joining
+
 
 
 class RegistrationForm(UserCreationForm):
@@ -18,5 +20,9 @@ class RegistrationForm(UserCreationForm):
                 # self.fields['email'].help_text =' <ul> <li>example@email.com </li> </ul> '
 
 
+class SelfPersonForm(forms.ModelForm):
 
+    class Meta:
+        model= Joining
+        fields= '__all__'
      
