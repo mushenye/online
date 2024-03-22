@@ -142,26 +142,27 @@ def search_name(request, pk):
                     query = request.POST.get("query", "")
                     if query and not isinstance(query, int):
                         # Perform search based on the query
-
-                        persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query)).filter(category=tracer.category)[:1]
-                        # filter person based on category in the tracer object
-                        for person in persons:
-                            # return with the instance of person
-                            if person.category != 'L':
-                                return render(request, 'user/register_name.html', {'persons': persons})
-                            else:
-                                students = Student.objects.filter(person=person, mode=tracer.mode, levels=tracer.level) 
-                                if students:
-
-                                    return render(request, 'user/register_name.html', {'students': students})
-                            
-                                    
+                        try:
+                            persons = Person.objects.filter(Q(first_name__icontains=query) | Q(other_name__icontains=query)).filter(category=tracer.category)[:1]
+                            # filter person based on category in the tracer object
+                            for person in persons:
+                                if person is None:      
+                                    messages.warning(request, 'We could not verify you, Try another search')
+                                    return render(request, 'user/register_name.html')
+                                if person.category != 'L':
+                                    return render(request, 'user/register_name.html', {'persons': persons})
                                 else:
-                                    messages.warning(request, 'We Could not Verify you , Please try again ')
-                                    return redirect("userprofile")
-                    
-                                #return with insttance of student
-                            
+                                    students = Student.objects.filter(person=person, mode=tracer.mode, levels=tracer.level) 
+                                    if students:
+                                        return render(request, 'user/register_name.html', {'students': students})
+                                    else:
+                                        messages.warning(request, 'We Could not Verify you , Please try again ')
+                                
+                            return render(request, 'user/register_name.html')
+                        
+                        except:
+                            messages.info(request, "We can not find your search, you can try again ")
+                            return redirect('userprofile')  
                     else:
                         messages.warning(request, "Empty search Not allowed, or we could not verify you")
                         return redirect('mode', tracer.id)
@@ -196,7 +197,9 @@ def search_name_normal(request, pk):
                         return redirect('mode', tracer.id)
                 else:
                     return render(request, 'user/normal_name.html') 
+                
         return render(request, 'user/normal_name.html')
+    
     except Tracer.DoesNotExist:
         messages.warning(request, 'Wrong request made. Try again!')
         return redirect('userprofile')

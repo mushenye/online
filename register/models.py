@@ -33,7 +33,6 @@ class LessonTopic(models.Model):
     date_created =models.DateField(auto_now_add=True)
     date_edited=models.DateField(auto_now=True)
     taught_on_date=models.DateField()
-    teacher=models.ForeignKey(Person, on_delete=models.CASCADE, related_name="teacher")
     topic= models.CharField(max_length=100)
     levels = models.CharField(choices=LEVEL, max_length=100)
     description=models.CharField(max_length=100)

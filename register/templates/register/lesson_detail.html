@@ -1,102 +1,183 @@
-{% extends "register/base.html"%} 
-{% block main%}
+{% extends "register/base.html"%} {% block main%}
 
 <div class="container">
-  <h4></h4>
 
-  <div class="card">
-    <div class="card-body">
-      <table class="table table-responsive">
-        <thead>
-          <tr>
-            <th scope="col">
-              <small class="card-title">{{lesson.topic.capitalize}}</small>
-            </th>
-            <th scope="col"><small>{{lesson.taught_on_date}}</small></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <p class="card-text">Teacher :</p>
-            </td>
-            <td>
-              <p class="card-text">{{lesson.teacher}}.</p>
-            </td>
-          </tr>
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <p>
+    <a class="btn" href="{% url 'viewlesson' onlineperson.person.id  %}"> Go Back </a> </p>
+    <div class="col-sm-5">
+      <h4></h4>
 
-          <tr>
-            <td>
-              <p class="card-text">Level :</p>
-            </td>
-            <td>
-              <p class="card-text">{{lesson.levels}}</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <small class="">{{lesson.description.capitalize}}</small>
+      <div class="card">
+        <div class="card-body">
+          <table class="table table-responsive">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <small class="card-title">{{lesson.topic.capitalize}}</small>
+                </th>
+                <th scope="col"><small>{{lesson.taught_on_date}}</small></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <p class="card-text">Teacher :</p>
+                </td>
+                <td>
+                  <p class="card-text">{{lesson.teacher}}.</p>
+                </td>
+              </tr>
 
-      {% if lesson.valid == True %} {% if user.is_staff %}
+              <tr>
+                <td>
+                  <p class="card-text">Level :</p>
+                </td>
+                <td>
+                  <p class="card-text">{{lesson.levels}}</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <small class="">{{lesson.description.capitalize}}</small>
+          <hr>
+          <div class=" text-center">
+            <p>
+              {% if lesson.valid == True %}
+               {% if user.is_staff %}
+              <a
+                href="{% url 'enrol' lesson.id %}"
+                class="card-link btn btn-sm btn-success"
+                >Reflesh list</a
+
+                <a href="{% url 'videoview' lesson.id %}" class="card-link"
+                >Report
+              </a>
+              >
+              {% endif %} 
+
+              {% if lesson.mode != 'Online'%}
+
+              <a href="{% url 'videoview' lesson.id %}" class="card-link"
+                >Lesson
+              </a>
+              
+              {% else%}
+              <a href="{% url 'join_online' lesson.id %}" class="card-link"
+                >Join_lesson</a
+              >
+              {% endif %} {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% if user.is_staff%}
+      <hr />
+
+    </div>
+  <div class="col-sm-4">
+      <div class="text-center">
+        <h2 class="btn btn-outline-light text-center" style="color: green">
+          <strong>LEARNERS ATTENDANCE</strong>
+        </h2>
+        <p>
+          {% if lesson.mode == 'Online'%}
+
+          <small>
+            The attendance will be marked automatically when the learner join
+            lesson</small
+          >
+
+          {% else%}
+          <small> Click on the learner's name to mark the attendance</small>
+          {% endif %}
+        </p>
+      </div>
+
+      {% for item in page_obj %}
+
+      <ul class="list-group">
+        <a class="text-decoration-none" href="{% url 'mark' item.id %}">
+          <li class="list-group-item">
+            {% if item.in_attendance == True %}
+            <p class="text-success">
+              {{item.student.person.first_name.capitalize}}
+              {{item.student.person.other_name.capitalize}}
+            </p>
+            {% else %}
+            <p class="text-warning">
+              {{item.student.person.first_name.capitalize}}
+              {{item.student.person.other_name.capitalize}}
+            </p>
+            {% endif %}
+          </li>
+        </a>
+      </ul>
+      {% empty %}
+      <div class="card">
+        <h4 class="text-center">No learners found</h4>
+        <a href="{% url 'home' %}" class="card-link btn btn-sm btn-success"
+          >View learner</a
+        >
+        {% endfor%}
+
+        {% comment %} {% if is_paginated %} {% endcomment %}
+      <div class="pagination  bg-light text-center p-2 mt-1 text-white">
+    <span class="step-links text-center">
+
+
+      {% if page_obj.has_previous %}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page=1"><small> First</small></a>
       <a
-        href="{% url 'enrol' lesson.id %}"
-        class="card-link btn btn-sm btn-success"
-        >Reflesh list</a
-      >
-      {% endif %} {% if lesson.mode == 'Online'%}
+        class="btn btn-sm  btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.previous_page_number}}"
+        >  <small>Previous</small>
+      </a>
+      {% endif %} {% for num in page_obj.paginator.page_range %} 
+      {% if page_obj.number == num %}
 
-      <a href="{% url 'videoview' lesson.id %}" class="card-link">View Lesson </a>
-      <a href="{% url 'videoview' lesson.id %}" class="card-link">View Report </a>
-      {% else%}
-      <a href="{% url 'join_online' lesson.id %}" class="card-link"
-        >Join_lesson</a
+      <a class="btn btn-sm btn-info mb-4 text-dark" href="?page={{ num }}"
+        ><small>{{ num }}</small></a
       >
-      {% endif %} {% endif %}
+
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3'%}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page={{num }}"
+        ><small>{{ num }}</small></a
+      >
+      {% endif %} 
+      {% endfor %} 
+      {% if page_obj.has_next %}
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.next_page_number}}"
+        ><small>Next</small></a
+      >
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{ page_obj.paginator.num_pages}}"
+        ><small>Last</small></a
+      >
+      {% endif %} 
+    </span>
+  </div>
+  {% comment %} {% endif%} {% endcomment %}
+{% if lesson.valid == 'True' %}
+        <h6>
+         Is learning over ?, Please end lesson</h6
+        >
+        <p class="text-end">
+          <a
+            href="{% url 'closslesson' lesson.id %}"
+            class="card-link btn btn-sm btn-success"
+            >End Lesson</a
+          >
+        </p>
+    {% endif %}
+      </div>
+
+      {% endif %}
     </div>
   </div>
-  {% if user.is_staff%}
-  <h6>Learners List</h6>
-  <small> Click on the learner's name to mark the attendance</small>
-
-  {% for item in class_attendance%}
-
-  <ul class="list-group">
-    <a class="text-decoration-none" href="{% url 'mark' item.id %}">
-      <li class="list-group-item">
-        {% if item.in_attendance == True %}
-        <p class="text-success">
-          {{item.student.person.first_name.capitalize}}
-          {{item.student.person.other_name.capitalize}}
-        </p>
-        {% else %}
-        <p class="text-warning">
-          {{item.student.person.first_name.capitalize}}
-          {{item.student.person.other_name.capitalize}}
-        </p>
-        {% endif %}
-      </li>
-    </a>
-  </ul>
-
-  {% empty %}
-  <div class="card">
-    <h4 class="text-center">No learners found</h4>
-    <a href="{% url 'home' %}" class="card-link btn btn-sm btn-success"
-      >View learner</a
-    >
-
-    {% endfor%}
-    <small>
-      if you end the Lesson you will not be able to use it again. Please end the
-      lesson at the end of learning</small
-    >
-
-    <a
-      href="{% url 'closslesson' lesson.id %}"
-      class="card-link btn btn-sm btn-success"
-      >End Lesson</a
-    >
-  </div>
-  {% endif %}
 </div>
 {% endblock main %}

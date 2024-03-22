@@ -1,0 +1,86 @@
+
+{% extends "register/base.html" %} 
+{% block main %}
+<section class="h-100 h-custom p-2" style="background-color: #eee">
+  <p class="text-end"> <a href="{% url 'person-list' %}" class="btn btn-sm btn-light"> View Learners 
+
+  <a href="{% url 'register_person'%}" class="btn btn-sm btn-light m-2"> Register </a> </p>
+  <div class="card text-center p-2 m-2"
+              <h2 class=" text-center btn btn-outline-light text-center t" style="color: blue;"><strong class="text-center">REGISTERED MEMBERS</strong></h2>
+</div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        {% comment %} <th scope="col"><small>S/no</small></th> {% endcomment %}
+        <th scope="col"><small>Name</small></th>
+        <th scope="col"><small>Local Church</small></th>
+
+         <th scope="col"><small>Category</small></th> 
+      </tr>
+    </thead>
+    <tbody>
+      {% for person in page_obj %}
+      <tr>
+        {% comment %} <td scope="row"><small>{{ forloop.counter }}</small></td> {% endcomment %}
+        <td>
+         
+            <small
+              >{{ person.first_name.capitalize }} 
+              {{person.other_name.capitalize}}</small
+            >
+          
+        </td>
+        <td><small>{{ person.Local_church}}</small></td>
+       {% if person.category == 'P'%}
+          <td> Leader</td>
+          {% elif person.category == 'T'%}
+          <td> Teacher</td>
+          {%else%}
+          <td> Member</td>
+          {% endif %}
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+<div class="pagination  bg-light text-center p-2 mt-5 text-white">
+    <span class="step-links text-center">
+      {% comment %} {% if is_paginated %}  {% endcomment %}
+      {% if page_obj.has_previous %}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page=1"><small> First</small></a>
+      <a
+        class="btn btn-sm  btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.previous_page_number}}"
+        >  <small>Previous</small>
+      </a>
+      {% endif %} {% for num in page_obj.paginator.page_range %} 
+      {% if page_obj.number == num %}
+
+      <a class="btn btn-sm btn-info mb-4 text-dark" href="?page={{ num }}"
+        ><small>{{ num }}</small></a
+      >
+
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3'%}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page={{num }}"
+        ><small>{{ num }}</small></a
+      >
+      {% endif %} {% endfor %} {% if page_obj.has_next %}
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.next_page_number}}"
+        ><small>Next</small></a
+      >
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{ page_obj.paginator.num_pages}}"
+        ><small>Last</small></a
+      >
+      {% endif %} 
+      {% comment %} {% endif %} {% endcomment %}
+    </span>
+  </div>
+
+
+</section>
+{% endblock main %}

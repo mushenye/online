@@ -1,29 +1,45 @@
-{% extends 'register/base.html' %}
-{% load static %}
+{% extends 'register/base.html' %} {% load static %} {% block main %}
+<div class="row d-flex justify-content-center align-items-center h-100">
+  <div class="col-sm-5">
+    <div class="card m-2 p-4">
+      <h2 class="btn btn-outline-light text-center t" style="color: blue">
+        <strong>SELECT YOUR MODE OF LEARNING</strong>
+      </h2>
 
-{% block main %}
-<div class="card m-2 p-4">
-    <h4 class=" text-center" >Select your mode of learning</h4>
-    <hr>
+      <hr />
 
-    <form method="post">
-        {% csrf_token %}
-        {% for code, label in mode %}
+      <form method="post">
+        {% csrf_token %} {% for code, label in mode %}
         <div class="form-check p-2" style="margin-left: 15px">
-            
-            <input class="form-check-input" type="radio" id="{{ code }}" name="query" value="{{ code }}">
-            <label for="{{ code }}"> <p>{{ label }} </p></label><br> 
-            
-       </div>
-            {% endfor %}
-    <div class=" card text-center">
-        <h4>
-    <a href="{% url 'tracer_delete' tracer.id %}" class="btn btn-sm btn-warning"> Exit </a>
-    <button type="submit" class="text-center m-4 btn btn-sm btn-primary">
-      Proceed
-    </button> </h4>         
-    </form>
-          {% comment %} <a href="{% url 'category' tracer.id  %}"  class="text-decoration-none text-end"> Go back <a>   {% endcomment %}
+          <input
+            class="form-check-input"
+            type="radio"
+            id="{{ code }}"
+            name="query"
+            value="{{ code }}"
+          />
+          <label for="{{ code }}"> <p>{{ label }}</p></label><br />
+        </div>
+        {% endfor %}
+        <div class="card text-center">
+          <h4>
+            <a
+              href="{% url 'tracer_delete' tracer.id %}"
+              class="btn btn-sm btn-warning"
+            >
+              Exit
+            </a>
+            <button
+              type="submit"
+              class="text-center m-4 btn btn-sm btn-primary"
+            >
+              Proceed
+            </button>
+          </h4>
+        </div>
+      </form>
+    </div>
+  </div>
 
+  {% endblock %}
 </div>
-{% endblock %}

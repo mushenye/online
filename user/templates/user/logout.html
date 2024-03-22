@@ -1,19 +1,31 @@
-{% extends 'user/base.html' %}  
-{% load static %}
- {%block information%} LOGGED OUT  {%endblock information %}
-{%block main%}
-<hr>
-<div class="container" >
-<div class="card p-2 m-2 text-center">
+{% extends 'user/base.html' %} {% load static %}  {%block main%}
+<hr />
+<div class="container">
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <div class="col-sm-5">
+      <div class="card p-2 m-2 text-center">
+        <h4>You are logged out</h4>
 
-  <h4 > You are logged out </h4>
-    
-    <div class="border-top pt-3">
-     
-        
-        <a class="ml-5" href="{% url 'login' %}"> <strong>Sign in  </strong> </a> 
-        
+        <div class="border-top pt-3">
+
+            <div class="d-flex justify-content-between">
+            <hr>
+          <div class="border-top pt-3 text-center">
+            <small class="">
+              
+             <a class=" btn btn-sm btn-primary m-2 text-" href="{% url 'login' %}"> Log in </a>
+<strong> Do you need an account with us ?</strong>
+              <a class="ml-5 btn btn-sm btn-primary m-2" href="{% url 'register' %}">
+                Sign Up
+              </a>
+
+            </small>
+          </div>
+        </div>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
-  </div>
-  {% endblock main%}
+</div>
+{% endblock main%}

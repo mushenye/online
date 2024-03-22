@@ -1,18 +1,22 @@
-{% extends "register/base.html"%}
-{% load crispy_forms_tags%} 
-{% load static %}
+{% extends "register/base.html"%} {% load crispy_forms_tags%} {% load static %}
 {% block main %}
-    
-<h4>Register person</h4>
-<div class="card p-2">
- <form method="post">
-  <div class="mb-3">
-       {% csrf_token %}
-       {{form|crispy }}
 
+<div class="row d-flex justify-content-center align-items-center h-100">
+  <div class="col-sm-4">
+    <div class="card p-2">
+      <h2 class="btn btn-light"><strong>ONLINE FORM</strong></h2>
+      <hr />
+      <form method="post">
+        <div class="mb-3">{% csrf_token %} {{form|crispy }}</div>
+        <div class="card p-2 text-center">
+          <h4>
+            <button type="submit" class="btn btn-sm btn-primary">SUBMIT</button>
+
+           
+          </h4>
+        </div>
+      </form>
+    </div>
   </div>
-  
-  <button type="submit" class="btn btn-primary">Save</button>
-</form> 
 </div>
 {% endblock main %}

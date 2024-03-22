@@ -1,6 +1,9 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from django.db.models import Q
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -10,30 +13,54 @@ from register.models import Attendance, ClassDay, LessonSummary, LessonTopic, No
 # Create your views here.
 
 def index(request):
+    user = request.user
+    context = {'person': None}
+    query_search = request.POST.get("query", "")
 
-    return render(request, 'register/index.html')
+    if query_search:
+        persons = Person.objects.filter(Q(first_name__icontains=query_search) | Q(other_name__icontains=query_search))[:2]
+        lessons = LessonTopic.objects.filter(Q(topic__icontains=query_search) | Q(description__icontains=query_search))[:2]
 
+    
+        context['persons'] = persons
+        context['lessons'] = lessons
 
-def person_list(request):
+    if user.is_authenticated:
+        try:
+            onlineperson = OnlinePerson.objects.get(user=user)
+            context['person'] = onlineperson.person
+        except OnlinePerson.DoesNotExist:
+            messages.info(request, "We could not verify who you are")
+            return redirect('userprofile')
+
+    return render(request, 'register/index.html', context)
+
+    
+
+ 
+def student_list(request):
     students = Student.objects.all()
     paginator = Paginator(students, 6)  
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     
-    return render(request, "register/home.html", context={
+    return render(request, "register/learner_list.html", context={
         "students": students,
         "page_obj": page_obj
         })
 
 
-# def search (request):
-#     if request.method == "POST":
-#         query = request.POST.get("query")
-#         persons = Person.objects.filter(first_name__icontains=query)  # Assuming you want to filter by first name
-#         return render(request, "register/home.html", context={"persons": persons})
-#     else:
-#         persons = Person.objects.all()  # If it's a GET request, return all persons
-#         return render(request, "register/home.html", context={"persons": persons})
+
+
+def members(request):
+    person = Person.objects.exclude(category='L')
+    paginator = Paginator(person, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, "register/members.html", context={"page_obj": page_obj})
+
+
 
 def person_details(request, pk):
     person = get_object_or_404(Person, id=pk)
@@ -47,23 +74,11 @@ def person_details(request, pk):
         except Student.DoesNotExist:
             pass
 
-    return render(request, 'register/person_detail.html', context)
+    return render(request, 'register/learner_detail.html', context)
 
 
-def enroll(request, pk):
-    user= request.user
-    if user.is_staff:
-        student=get_object_or_404(Student, id=pk)
-        student.is_enrolled= True
-        student.save()
-        messages.success(request, f'{student.person} has been enrolled in {student.mode} class succesfully')
 
-    else:
-        messages.warning(request, 'Request not allowed !!')
-
-    return redirect('home')
-
-
+@login_required
 def add_person(request):
     user= request.user
     if user.is_staff:
@@ -75,7 +90,7 @@ def add_person(request):
                     person = form.save()
                     new_student = Student.objects.create(person=person)
                     return redirect('edit_student', new_student.id)
-                elif category == 'T':
+                elif category == 'T' or category == 'P':
                     person = form.save()
                     OnlinePerson.objects.create(person=person)
                     return redirect('home')
@@ -88,8 +103,10 @@ def add_person(request):
     else:
         messages.warning(request, 'Request not allowed !!')
         return redirect('home')
+    
 
 
+@login_required
 def edit_person(request, pk):
     user=request.user
     if user.is_staff:
@@ -164,125 +181,155 @@ def student(request,pk):
 def lessons (request):
     user=request.user
     if user:
-        if request.method == "POST":
-            form = LessonForm(request.POST, initial={'user':user})
-            if form.is_valid():
-                mode =form.cleaned_data['mode']
-                if mode =='Online':
-                    lesson=form.save()
+        try:
+            onlineperson=OnlinePerson.objects.get(user=user)
 
-                    onlinelesson, created =OnlineLesson.objects.get_or_create(lesson=lesson)
+            if request.method == "POST":
+                form = LessonForm(request.POST, initial={'user':user})
+                if form.is_valid():
+                    mode =form.cleaned_data['mode']
+                    if mode =='Online':
+                        lesson=form.save()
+                        onlinelesson, created =OnlineLesson.objects.get_or_create(lesson=lesson)
+                        return redirect("onlinelesson", onlinelesson.id )
+                    else:
+                        form.save()
 
-                    return redirect("onlinelesson", onlinelesson.id )
-                else:
-
-                    form.save( )
-            return redirect('viewlesson')
-        else:
-            form = LessonForm(initial={'user':user})
-            persons = Person.objects.filter(category="T")
-            if persons:
-                    form.fields['teacher'].queryset = persons
-
+                return redirect('viewlesson', onlineperson.person.id)
             else:
-                    messages.info(request,'No teacher exist. You can register ')
-                    return redirect('register_person')        
+                form = LessonForm(initial={'user':user})
+        
+                return render(request, 'register/lesson.html', {'form': form})
+        except OnlinePerson.DoesNotExist:
+            messages.wrning(request, "You may be unauthorised to add lesson, try again")
+            return redirect('userprofile')
     else:
         return redirect('login')  
-    return render(request, 'register/lesson.html', {'form': form})
 
-
-
-#form to register new student as online
-
-# def onlineclass(request,pk):
-#     user=request.user
-#     if user.is_staff:
-#         onlinelesson= OnlineLesson.objects.get(id=pk)
-#         if request.method =="POST":
-#             form = OnlineLessonForm(request.POST, instance=onlinelesson)
-#             if form.is_valid():
-#                 lesson=form.save()
-#                 return redirect('details',lesson.id )
-#         else:
-#             form = OnlineLessonForm(instance=onlinelesson)
-
-#         return render(request, 'register/onlineform.html', {'form':form})
-#     else:
-#         messages.warning(request, 'Request not allowed !!')
-#         return redirect('home')
     
 
 
 def lesson_edit(request, pk):
     user=request.user
     if user.is_staff:
-        try: 
-            lesson = get_object_or_404(LessonTopic, id=pk)
-        except Person.DoesNotExist:
-            messages.warning(request, "No such lesson exits.")
-            return redirect('viewlesson')
-        if lesson.is_taught== False:
-            if request.method == "POST":
-                form = LessonForm(request.POST, instance=lesson)
-                if form.is_valid():
-                    mode= form.cleaned_data['mode']
-                    lesson= form.save(commit=False)
-                    if mode== 'Online':
-                        lesson.valid= True
-                        lesson.is_taught =False
-                        form.save()
-                    
-                        onlinelesson, created= OnlineLesson.objects.get_or_create(lesson=lesson)
-                        return redirect("onlinelesson", onlinelesson.id )
+        try:
+            onlineperson=OnlinePerson.objects.get(user=user)
+            try: 
+                lesson = LessonTopic.objects.get(id=pk) 
+                if lesson.is_taught== False:
+                    if request.method == "POST":
+                        form = LessonForm(request.POST, instance=lesson)
+                        if form.is_valid():
+                            mode= form.cleaned_data['mode']
+                            lesson= form.save(commit=False)
+                            if mode== 'Online':
+                                lesson.valid= True
+                                lesson.is_taught =False
+                                form.save()
+                                onlinelesson, created= OnlineLesson.objects.get_or_create(lesson=lesson)
+                                return redirect("onlinelesson", onlinelesson.id )
+                            else:
+                                lesson.valid= True
+                                lesson.is_taught =False
+                                form.save()
+                                try:
+                                    onlinelesson = OnlineLesson.objects.get(lesson=lesson)
+                                    onlinelesson.delete()
+                                except OnlineLesson.DoesNotExist:
+                                    pass 
+                                return redirect('viewlesson',onlineperson.person.id )
                     else:
-                        lesson.valid= True
-                        lesson.is_taught =False
-                        form.save()
-                        try:
-                            onlinelesson = OnlineLesson.objects.get(lesson=lesson)
-                            onlinelesson.delete()
-                        except OnlineLesson.DoesNotExist:
-                            pass 
-                        return redirect('viewlesson')
-            else:
-                form = LessonForm(instance=lesson)
-                persons = Person.objects.filter(category="T")
-                if persons:
-                    form.fields['teacher'].queryset = persons
+                        form = LessonForm(instance=lesson)
+                        return render(request, 'register/lesson.html', {'form': form})     
                 else:
-                    messages.info(request,'No teacher exist')
-                    return redirect('register_person')
-        else:
-            messages.warning(request,'This lesson is already taught, add another lesson to continue')
+                    messages.warning(request,'This lesson is already taught, add another lesson to continue')
+                    return redirect('addlesson')       
 
-        return render(request, 'register/lesson.html', {'form': form})
+            except LessonTopic.DoesNotExist:
+                messages.warning(request, "No such lesson exits.")
+                return redirect('home' )
+        except OnlinePerson.DoesNotExist:
+            messages.warning(request, 'You are not validated to person that functions')
+            return redirect('home')  
     else:
         messages.warning(request,'You are not allowed to edit')
-        return redirect( 'viewlesson')
+        return redirect( 'home')
+    
 
 
+def enroll(request, pk):
+    user= request.user
+    if user.is_staff:
+        student=get_object_or_404(Student, id=pk)
+        student.is_enrolled= True
+        student.save()
+        messages.success(request, f'{student.person} has been enrolled in {student.mode} class succesfully')
+    else:
+        messages.warning(request, 'Request not allowed !!')
+    return redirect('userprofile')
+
+
+# adding  lesson form 
+def online_class(request, pk):
+    online=OnlineLesson.objects.get(id=pk)
+    if request.method == 'POST':
+        form=OnlineLessonForm(request.POST,instance=online)
+        if form.is_valid():
+            form.save()
+            return redirect ('home')
+    else:
+        form=OnlineLessonForm(instance=online)
+    return render(request, 'register/onlineform.html', {'form':form})
+
+ 
+
+
+ #view lesson 
 def view_lessons(request, pk):
     person=Person.objects.get(id=pk)
+    lessons = LessonTopic.objects.all().order_by("-date_created")
     today_date = date.today()
-    if person.category != "L":
 
-        lessons = LessonTopic.objects.all().order_by("-date_created")
+    query = request.POST.get("query")
+
+
+    if person.category != "L":
+        
         valid_lesson = [lesson for lesson in lessons if lesson.taught_on_date < today_date]
         LessonTopic.objects.filter(id__in=[lesson.id for lesson in valid_lesson]).update(valid=False)
+        if query:
+            if query == "next":
+                lessons=lessons.filter(taught_on_date__gte=today_date)[:4]
+            elif query == "today":
+                lessons=lessons.filter(taught_on_date = today_date)
+            else:
+                lessons=lessons
 
     else:
         student =Student.objects.get (person=person)
-        lessons = LessonTopic.objects.filter( levels=student.levels, mode =student.mode ).order_by("-date_created")
+        lessons = lessons.filter( levels=student.levels, mode =student.mode )
         valid_lessons = [lesson for lesson in lessons if lesson.taught_on_date < today_date]
         LessonTopic.objects.filter(id__in=[lesson.id for lesson in valid_lessons]).update(valid=False)
+        if query:
+            if query == "next":
+                lessons=lessons.filter(taught_on_date__gte=today_date)[:2]
+            elif query == "today":
+                lessons=lessons.filter(taught_on_date = today_date)
+            else:
+                lessons=lessons
+            
+    paginator = Paginator(lessons, 6)  
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)  
 
 
-    return render(request, 'register/lesson_view.html', {'lessons': lessons})
-
+    return render(request, 'register/lesson_view.html', {'lessons': lessons,'page_obj':page_obj})
 
 
 def view_lesson(request, pk):
+    user=request.user
+    onlineperson=OnlinePerson.objects.get(user=user)
+
     lesson = LessonTopic.objects.get(id=pk)
 
     classday, created = ClassDay.objects.get_or_create(lesson=lesson)
@@ -292,12 +339,23 @@ def view_lesson(request, pk):
         if students.exists():
             for student in students:
                 Attendance.objects.create(classday=classday, student=student)
-        else:
-            return redirect("viewlesson")
+                    
+       
         
     class_attendance = Attendance.objects.filter(classday=classday)
+
+    paginator = Paginator(class_attendance, 4)  
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
   
-    return render(request, 'register/lesson_detail.html', {'lesson': lesson, 'class_attendance': class_attendance})
+    return render(request, 'register/lesson_detail.html', {'lesson': lesson, 'class_attendance': class_attendance, 'page_obj':page_obj, 'onlineperson':onlineperson})
+
+
+# def today_lesson(request):
+#     today_date=today_date = date.today()
+#     lessons=LessonTopic.objects.filter(taught_on_date=today_date, valid=True)
+
+#     return render(request, 'register/lesson_view.html', {'lessons': lessons})
 
 
 
@@ -349,7 +407,6 @@ def close_lesson(request, pk):
     lesson_summary, created = LessonSummary.objects.get_or_create(lesson=lesson, number_of_students=student_count)
     
     if created:
-
         lesson=LessonTopic.objects.get(id=lesson_summary.lesson.id)
 
         lesson.is_taught=True
@@ -360,7 +417,8 @@ def close_lesson(request, pk):
         return redirect('comment', lesson_summary.id)
 
     else:
-        return redirect('viewlesson')
+        return redirect('viewlesson', lesson.user.person.id )
+    
 
 def lesson_summary(request):
     
@@ -372,13 +430,15 @@ def lesson_summary(request):
 
 
 def comment(request, pk):
+    user=request.user
     lessonsummary = get_object_or_404(LessonSummary, id=pk)
+    onlineperson=OnlinePerson.objects.get(user=user)
 
     if request.method == "POST":
         form = CommentForm(request.POST, instance=lessonsummary)
         if form.is_valid():
             form.save()
-            return redirect('viewlesson')  
+            return redirect('viewlesson', onlineperson.person.id)  
     else:
         form = CommentForm(instance=lessonsummary)
     
@@ -402,76 +462,33 @@ def learner_in_class (request, pk):
 
 
 
-def report(request):
-    classday=ClassDay.objects.filter()
-
-    return render(request, 'register/report.html', )
-
-
-
-
-def student_attendance(request,pk):
-    student=get_object_or_404(Student, id=pk)
-    attendance=Attendance.objects.filter(in_attendance=True, students=student).count()
-    
-    return render(request, 'register/report2.html', {'attendance': attendance})
-
-
-
-def attendance_summary(request):
-    class_days = ClassDay.objects.all().prefetch_related('attendance_set')
-    
-    return render(request, 'register/attendance_summury.html', {'class_days': class_days})
-
-
-def view_attendance(request, pk):
-    class_day = get_object_or_404(ClassDay, pk=pk)
-    attendance_records = class_day.attendance_set.all()
-
-    return render(request, 'register/view_attendance.html', 
-                  {'class_day': class_day, 
-                   'attendance_records': attendance_records})
-
-
 
 
 
 def register_online(request, pk):
     user=request.user
     if user.is_authenticated:
+
+        person=Person.objects.get(id=pk)
         try:
-            person=Person.objects.get(id=pk)
-
-            try:
-                learner= OnlinePerson.objects.get(person=person) 
-            except OnlinePerson.DoesNotExist:
-                messages.warning(request, "We couldn't verify who you are, check your login details or consult your administrator")
-                return redirect('userprofile')
-
+            learner= OnlinePerson.objects.get(person=person) 
             if learner.user == user:
                 messages.success(request, f'Welcome back ( {user}, Name: {person}) select Lesson to continue')
                 return redirect('viewlesson', person.id)
-            
-            elif learner.user == None:
-                try:
-                    learner.user=user
-                    learner.save()
-                except:
-                    messages.warning(request, ' User with this Person already exists.')
-                    return redirect('userprofile')
+
+            else:
+                learner.user=user
+                learner.save()
 
                 student=Student.objects.get(person=person)
                 student.is_enrolled= True
                 student.save()
-
-                messages.success(request, f'Welcome ( {user}, Name: {person}) select Lesson to continue')
                 return redirect('viewlesson', person.id)
-            else:
-                messages.warning(request, f' You can Not log in with  ( {user}, and  {person}) for online class')
-                return redirect ('userprofile')
-        except Person.DoesNotExist:
-            messages.warning(request, 'We could find the person, try another search')
-            return redirect('userprofile') 
+            
+        except:
+            messages.warning(request, f' You can Not log in with  ( {user}, and  {person}) for online class')
+            return redirect ('userprofile') 
+    
     else:
         return redirect ('login')              
                    
@@ -488,9 +505,14 @@ def join_online(request, pk):
         try:
             online_learner = OnlinePerson.objects.get(user=user)
             student=Student.objects.get(person=online_learner.person)
-            attendance = get_object_or_404(Attendance, classday=classday, student= student)
+            
+            try:
+                attendance = Attendance.objects.get(classday=classday, student= student) 
+            except Attendance.DoesNotExist:
+                return redirect('enrol',lesson.id)
+
             if attendance.classday.lesson.valid and not attendance.in_attendance:
-                lesson_count=LessonTopic.objects.filter(level=attendance.student.levels,  mode=attendance.student.mode).count()
+                lesson_count=LessonTopic.objects.filter(levels=attendance.student.levels,  mode=attendance.student.mode).count()
 
                 attendance.in_attendance = True
                 attendance.save()
@@ -501,10 +523,11 @@ def join_online(request, pk):
                     student.save()
                 except Student.DoesNotExist:
                     pass
+
             return redirect('videoview', online.id)
         except OnlinePerson.DoesNotExist:
             messages.warning(request, 'Leaner does not Exist')
-            return redirect('viewlesson' )
+            return redirect('viewlesson', lesson.user.person.id)
     else:
         messages.warning(request, 'Yo are not authenticated, Please log in to continue')
         return redirect('login')

@@ -1,6 +1,5 @@
 {% extends "user/base.html"%} {% load crispy_forms_tags%} {% load static %}
 {% block main %}
-
 <div class="row d-flex justify-content-center align-items-center h-100 ">
   <div class="col-sm-4 m-5">
     <div class="card p-2 m-2">
@@ -16,7 +15,7 @@
            <div class="d-flex justify-content-between">
             <hr>
           <div class="border-top pt-3">
-            <small class="">
+            <small class=" text-italic">
               <strong> Do you need an account with us ?</strong>
 
               <a class="ml-5 btn btn-sm btn-outline-info" href="{% url 'register' %}">
@@ -33,4 +32,5 @@
     </div>
   </div>
 </div>
+
 {% endblock main %}

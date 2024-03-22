@@ -1,35 +1,26 @@
-{% extends "register/base.html"%}
-{% load crispy_forms_tags%} 
-{% load static %}
+{% extends "register/base.html"%} {% load crispy_forms_tags%} {% load static %}
 {% block main %}
-    
-
 
 <div class="row d-flex justify-content-center align-items-center h-100">
-        
-        <div class="col-sm-4">
-<div class="card p-2">
+  <div class="col-sm-5 m-3 p-4">
+    <div class="card p-2 ">
+      <h2 class="btn btn-light"><strong>REGISTRATION</strong></h2>
+      <hr />
+      <form method="post">
+        <div class="mb-3">{% csrf_token %} {{form|crispy }}</div>
+        <div class="card p-2 text-center">
+          <h4>
+            <button type="submit" class="btn btn-sm btn-primary">SUBMIT</button>
 
-        <h2 class="btn btn-light"><strong>REGISTERATION</strong></h2>
-        <hr>
- <form method="post">
-  <div class="mb-3">
-       {% csrf_token %}
-       {{form|crispy }}
-
+            {% comment %}
+            <button type="submit" class="btn btn-sm btn-primary">
+              ADD PERSON
+            </button>
+            {% endcomment %}
+          </h4>
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="card  p-2 text-center">
-<h4>
-
-  <button type="submit" class="btn btn-sm btn-primary">SUBMIT</button>
-
- 
-  {% comment %} <button type="submit" class="btn btn-sm btn-primary">ADD PERSON</button> {% endcomment %}
-
-</h4>
-  </div>
-</form> 
-</div>
-</div>
 </div>
 {% endblock main %}

@@ -1,23 +1,33 @@
 {% extends 'register/base.html' %} {% load static %} {% block main %}
-<div class="row my-3 text-decoration-none text-center">
-  <div class="card p-2 ">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+
+<div class="col-sm-5">               
+   <h2 class=" btn btn-outline-light text-center " style="color: blue;"><strong>YOU ARE LOGGED IN AS:</strong></h2>
+
+  <div class="card p-2 text-center ">
     <h4>
-      Name: {{person.first_name.capitalize}} {{person.other_name.capitalize}}
+     <strong> Name: </strong>{{person.first_name.capitalize}} {{person.other_name.capitalize}}
     </h4>
-    <h4>User Name: {{user.username}}</h4>
+    <h4><strong>User Name:</strong> {{user.username}}</h4>
     <hr />
 
-    Email : {{user.email}}
+    <strong>Email :</strong> {{user.email}}
   </div>
-<h2>
+<h1 class="text-center">
   <a href="{% url 'userprofile' %}" class="btn btn-light btn-sm">Go Back</a>
 
-  <a href="{% url 'viewlesson' person.id %}" class="btn btn-light btn-sm"
+  <a href="{% url 'viewlesson' person.id %}" class="btn btn-warning mx-4 btn-sm text-end"
     ><strong> Continue</strong></a
   >
-</h2>
-  <div class="container-fluid h-custom">
+</h1>
+ <p> If the information is incorrect, Go back and try another search </p>
+
+</div>    
+
+<div class="container-fluid h-custom">
+
     <div class="row d-flex justify-content-center align-items-center h-100">
+    
       <div class="col-md-9 col-lg-6 col-xl-5">
         <img
           src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
@@ -38,4 +48,5 @@
 
     {% endblock %}
   </div>
+
 </div>

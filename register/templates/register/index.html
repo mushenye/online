@@ -5,30 +5,69 @@
 
 <div class="row d-flex justify-content-center align-items-center h-100 p-6">
 
- <div class="col-sm-4">
- <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
+ <div class="col-sm-7 text-center" >
+ <form  method="post" class="d-flex">
+  {%csrf_token%}
+        <input class="form-control me-2" type="search" placeholder="Type your search " aria-label="Search"  id="query"
+            type="text"
+            name="query">
+        <button class="btn btn-sm btn-outline-success " type="submit">Search</button>
       </form>
  <hr/>
 
-<ul class="list-group">
-    <li class="list-group-item " ><a  class="text-decoration-none " href="{% url 'userprofile'%}" ><h4>Check In</h4></a></li>
-  <li class="list-group-item " ><a  class="text-decoration-none " href="{% url 'person-list'%}" ><h4>Learner List</h4></a></li>
-  <li class="list-group-item"><a  class="text-decoration-none " href="{% url 'lesson_summary'%}" ><h4>Lessons Summary </h4></a></li>
-  <li class="list-group-item"><a  class="text-decoration-none " href="{% url 'classes-list'%}" ><h4>Attendance Report</h4></a></li>
-  <li class="list-group-item"><a  class="text-decoration-none " href="#" ><h4>Progress Report</h4></a></li>
-  <li class="list-group-item">
-  <a class="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-           <h4> Exams </h4>
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">Book 1</a></li>
-            <li><a class="dropdown-item" href="#">Book 2</a></li>
-          </ul>
-        </li>
-    </li>
-</ul>
+
+ <a href ="{% url 'userprofile'%}" class="btn  btn-warning px-4 m-2 " style=" border-radius:20px; "> CHECK IN</a>
+  <a href ="{% url 'person-list'%}" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; "> LEARNERS</a>
+   <a href ="{% url 'lesson_summary'%}" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; "> SUMMARY</a>
+   {% if user.is_staff%}
+    <a href ="{% url 'viewlesson' person.id %}" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; "> LESSONS</a>
+     <a href ="{% url 'addlesson'%}" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; "> ADD LESSON</a>
+ <a href ="{% url 'register_person'%}" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; "> REGISTER  </a>
+
+    {% endif %}
+    
+ <a href ="" class="btn  btn-primary px-4 m-2 " style=" border-radius:20px; ">CONTINUE </a> 
+
+<hr>
+{% if user.is_authenticated%}
+{% for item in persons %}
+
+<div class="list-group">
+  <a href="{% url 'person_details' item.id %}" class="list-group-item list-group-item-action flex-column align-items-start ">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1">{{item.first_name.capitalize}} {{item.other_name.capitalize}}</h5>
+      <h5 class="mb-1">{{item.Local_church}}</h5>
+
+      <small>{{item.date_created}}</small>
+    </div>
+  </a>
+</div>
+<hr>
+{% endfor %}
+
+{% for item in lessons%}
+<div class="list-group">
+  <a href="{% url  'details' item.id %}" class="list-group-item list-group-item-action flex-column align-items-start ">
+    <div class="d-flex w-100 justify-content-between">
+      <h5 class="mb-1 text-start">{{item.topic.capitalize}}</h5>
+      <small>{{item.date_created}}</small>
+    </div>
+    <p class="mb-1 text-start">{{item.description.capitalize}}</p>
+    <P class="text-end">{{item.levels}} {{item.mode}}</P>
+  </a>
+</div>
+  <hr>
+{% endfor %}
+{% else%}
+<div class="card alert">
+  <p>
+    You must be authenticated to use the search service
+  </p>
+
+</div>
+{% endif %}
+
+
 
 </div>
 </div>

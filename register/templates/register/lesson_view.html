@@ -1,56 +1,125 @@
+{% extends "register/base.html"%} {% block main%}
 
-{% extends "register/base.html"%}
-{% block main%}
+<div class="container">
+    {% if user.is_staff%}
+<p>
+    <a href="{% url 'addlesson' %}" class="btn btn-sm btn-success">
+      <small> Add Lesson </small>
+    </a>
 
-
-  {% if user.is_staff%}
-
-<a href="{% url 'addlesson' %}" class= "btn btn-sm btn-success"> <small> Add Lesson </small>  </a>
- 
-{% endif %}
-<hr>
-
-
-<div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col-sm-4">
-          
-     {% for item in lessons%}
-     <div class="card p-2 m-2 ">
-     
-    <ul class="list-group list-group ">
-  <li class="list-group-item d-flex justify-content-between align-items-start p-2 ">
-    <div class=" me-auto m-2">
-      <div class="fw-bold"><small>{{item.topic.capitalize }}</small></div>
-      <small>{{item.description}}</small>
-    </div>
-   {% if item.valid == True %}
-    <span class="badge bg-primary rounded-pill"><small>{{item.taught_on_date}}</small></span>
-    {% else %}
-     <span class="badge bg-warning rounded-pill"><small>{{item.taught_on_date}}</small></span>
     {% endif %}
-    <span class="badge bg-danger rounded-pill"><small>{{item.mode}}</small></span>
 
-  </li>
+    <form method = "post">
+      {% csrf_token %}
+      <button  id= "all" name ="query" value ="all"><small> View All </small></button>
+      <button id= "today" name ="query" value ="today"> <small> Today Lesson </small></button>
+      <button id= "next"name ="query" value ="next"><small> Next Lesson </small></button>
+    </form>
+  </p>
+    <hr />
 
+     <div class=" row d-flex">
+    
 
-  </ul> 
-        <div class="p-2"style="display:flex;gap: 10px">
-              <div>
-              {% if item.is_taught == False%}
-            
-              <a href="{% url 'edit_lesson' item.id %}" class= "btn btn-sm btn-success">  Edit  </a>
+      {% for item in page_obj%}
+       <div class="col-sm-6">
+      <div class="card p-2 m-2">
+        <ul class="list-group list-group">
+          <li
+            class="list-group-item d-flex justify-content-between align-items-start p-2"
+          >
+            <div class="me-auto m-2">
+              <div class="fw-bold">
+                <small>{{item.topic.capitalize }}</small>
               </div>
-            <div class="float-center">
-              {% else%}
-              <small> This Lesson has been taught please check with the teacher</small>
-              {% endif %}
+              <small>{{item.description}}</small>
             </div>
-              <a  class=" btn btn-sm btn-light float-end" href="{% url 'details' item.id %}">Details</a>
+            {% if item.valid == True %}
+            <span class="badge bg-primary rounded-pill"
+              ><small>{{item.taught_on_date}}</small></span
+            >
+            {% else %}
+            <span class="badge bg-warning rounded-pill"
+              ><small>{{item.taught_on_date}}</small></span
+            >
+            {% endif %}
+            <span class="badge bg-danger rounded-pill"
+              ><small>{{item.mode}}</small></span
+            >
+          </li>
+        </ul>
+        <div class="p-2" style="display: flex; gap: 10px">
+          <div>
+            {% if item.is_taught == False%}
 
+            <a
+              href="{% url 'edit_lesson' item.id %}"
+              class="btn btn-sm btn-success"
+            >
+              Edit
+            </a>
+          </div>
+          <div class="float-center">
+            {% else%}
+            <small>
+              This Lesson has been taught please check with the teacher</small
+            >
+            {% endif %}
+          </div>
+          <a
+            class="btn btn-sm btn-light float-end"
+            href="{% url 'details' item.id %}"
+            >Details</a
+          >
+        </div>
       </div>
+       </div>
+      {% endfor%}
+   
   </div>
-   {% endfor%}
+
+     {% comment %} {% if is_paginated %} {% endcomment %}
+      <div class="pagination  bg-light text-center p-2 mt-1 text-white">
+    <span class="step-links text-center">
+
+
+      {% if page_obj.has_previous %}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page=1"><small> First</small></a>
+      <a
+        class="btn btn-sm  btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.previous_page_number}}"
+        >  <small>Previous</small>
+      </a>
+      {% endif %} {% for num in page_obj.paginator.page_range %} 
+      {% if page_obj.number == num %}
+
+      <a class="btn btn-sm btn-info mb-4 text-dark" href="?page={{ num }}"
+        ><small>{{ num }}</small></a
+      >
+
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3'%}
+      <a class="btn btn-sm btn-outline-info mb-4 text-dark" href="?page={{num }}"
+        ><small>{{ num }}</small></a
+      >
+      {% endif %} 
+      {% endfor %} 
+      {% if page_obj.has_next %}
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{page_obj.next_page_number}}"
+        ><small>Next</small></a
+      >
+      <a
+        class="btn btn-sm btn-outline-info mb-4 text-dark"
+        href="?page={{ page_obj.paginator.num_pages}}"
+        ><small>Last</small></a
+      >
+      {% endif %} 
+    </span>
+  </div>
+  {% comment %} {% endif%} {% endcomment %}
+
+
 </div>
-</div>
- 
- {% endblock main %}
+
+{% endblock main %}
