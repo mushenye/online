@@ -65,6 +65,19 @@
     </h3>
     <hr />
 
+    {% if item.category == 'P'%}
+    
+    <div>
+      <a
+        href="{% url 'online_register' item.id %}"
+        class="btn btn-light btn-sm"
+        ><strong> Continue</strong></a
+      >
+    </div>
+
+
+    {% else%}
+
     <div>
       <a
         href="{% url 'viewlesson' item.id %}"
@@ -72,6 +85,8 @@
         ><strong> Continue</strong></a
       >
     </div>
+{% endif %}
+
   </div>
   <hr />
 

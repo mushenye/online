@@ -23,16 +23,17 @@ class MySetPasswordForm(SetPasswordForm):
 
 
 class RegistrationForm(UserCreationForm):
-    email=forms.EmailField( required=True)
+    email = forms.EmailField(required=True)
+    
     class Meta:
-        model=User
-        fields=['username', 'email', 'password1','password2']
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
 
-        def __init__(self, *args, **kwargs):
-            super(RegistrationForm, self). __init__( *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(RegistrationForm, self).__init__(*args, **kwargs)
         
-            for key, value in self.fields.items():
-                value.widget.attrs.update({'class':'form-control'})
+        for key, value in self.fields.items():
+            value.widget.attrs.update({'class': 'form-control'})
                 # self.fields['email'].help_text =' <ul> <li>example@email.com </li> </ul> '
 
 

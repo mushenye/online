@@ -1,93 +1,55 @@
-{% extends 'register/base.html' %}  
-{% load static %}
-{% load crispy_forms_tags%} 
-{%block information%} REGISTER {%endblock information %} 
-
-{%block main%}
+{% extends 'register/base.html' %} {% load static %} {% load crispy_forms_tags%}
+ {%block main%}
 
 <div class="container">
-  <section class="h-100 h-custom" style="background-color: #eee">
-    <div class="container py-5 h-100">
-      <div class="row d-flex justify-content-center align-items-center h-100">
-        <div class="col">
-
-            <div class="card">
-              <div class="card-body p-4">
-                  <div class="row">
-<legend class="border-bottom mb-4">
-                              Join us Today
-                              
-                            </legend>
-                            <hr>
+  <div class="row d-flex justify-content-center align-items-center h-100">
+    <div class="card">
+      <div class="card-body p-2">
+        <div class="row">
+          <legend class="border-bottom mb-4">Join us Today</legend>
+          <hr />
 
           <div class="col-lg-6">
-           
-                      <form method="post">
-                        <fieldset class="form-group">
-                          <div>
-                            
-                          </div>
-                          {% csrf_token %} {{ form|crispy }}
-                        </fieldset>
-                        
-                    
-                      </diV>
-
-
-    
-                        <div class="col-lg-6">
-                            <div class="alert">
-                              <p>
-                                <strong> Please note:</strong>
-                                Enter your correct Email address, you will need it when want to reset your password
-                              </p>
-                            </div>
-
-
-
-                           <div class="card p-4">
-                  
-                              <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn btn-success">
-                                  SUBMIT
-                                </button>
-                              
-                              </div>
-                              <div class="d-flex justify-content-between">
-                              
-                                      <div class="border-top pt-3">
-                                                <small class="">
-                                             <strong>    Already have an account with us?
-                                                  <a class="ml-5 btn btn-outline-info" href="{% url 'login' %}">
-                                                    Sign in </strong></a
-                                                  >
-                                                </small>
-                                      
-                              </div>
-                            </div>
-                  
-                            </div>
-                  
-                          
-                        </div>
-
-                            </form>
-
-
-           
-
-
-
-
-
-          </div>        
+            <form method="post">
+              <fieldset class="form-group">
+                {% csrf_token %} {{ form|crispy }}
+              </fieldset>
           </div>
-        
-        </div>
-        
+              <div class="col-lg-6">
+                <div class="alert">
+                  <p>
+                    <strong> Please note:</strong>
+                    Ensure that you have access to the Email address you provide. You will require it wwhen to reset your password
+                  </p>
+                </div>
+              
+
+                <div class="card p-4">
+                  <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn btn-success">
+                      SUBMIT
+                    </button>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                      <div class="border-top pt-3">
+                        <strong>
+                          Already have an account with us?
+                          <a
+                            class=" text-end ml-5 btn btn-outline-info"
+                            href="{% url 'login' %}"
+                          >
+                            Sign in
+                          </a></strong
+                        >
+                      </div>
+                  </div>
+              </div>
+              </div>
+            </form>
+          
         </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
 {% endblock%}

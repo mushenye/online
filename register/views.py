@@ -18,20 +18,20 @@ def index(request):
     query_search = request.POST.get("query", "")
 
     if query_search:
-        persons = Person.objects.filter(Q(first_name__icontains=query_search) | Q(other_name__icontains=query_search))[:2]
-        lessons = LessonTopic.objects.filter(Q(topic__icontains=query_search) | Q(description__icontains=query_search))[:2]
+            persons = Person.objects.filter(Q(first_name__icontains=query_search) | Q(other_name__icontains=query_search))[:2]
+            lessons = LessonTopic.objects.filter(Q(topic__icontains=query_search) | Q(description__icontains=query_search))[:2]
 
-    
-        context['persons'] = persons
-        context['lessons'] = lessons
+        
+            context['persons'] = persons
+            context['lessons'] = lessons
 
     if user.is_authenticated:
-        try:
-            onlineperson = OnlinePerson.objects.get(user=user)
-            context['person'] = onlineperson.person
-        except OnlinePerson.DoesNotExist:
-            messages.info(request, "We could not verify who you are")
-            return redirect('userprofile')
+            try:
+                onlineperson = OnlinePerson.objects.get(user=user)
+                context['person'] = onlineperson.person
+            except OnlinePerson.DoesNotExist:
+                messages.info(request, "We could not verify who you are")
+                return redirect('userprofile')
 
     return render(request, 'register/index.html', context)
 

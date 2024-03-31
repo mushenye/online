@@ -3,32 +3,48 @@
 <div class="row d-flex justify-content-center align-items-center h-100">
   <div class="col-sm-5">
     <div class="card p-2 m-3">
-      <h2 class="btn btn-light"><strong>PERSON DETAILS</strong></h2>
+      <h2 class="btn btn-light"><strong>LEARNER DETAILS</strong></h2>
       <hr />
-      <ul class="list-group">
-        <li class="list-group-item">
-          Name:{{student.person.first_name.capitalize}}
-          {{student.person.other_name.capitalize}}
-        </li>
-        {% comment %}
-        <li class="list-group-item">Category:{{student.person.category}}</li>
-        {% endcomment %}
-        <li class="list-group-item">mode:{{student.mode}}</li>
-        <li class="list-group-item">Level:{{student.levels}}</li>
-        <li class="list-group-item">
-          Local Meeting:{{student.person.Local_church}}
-        </li>
-        <li class="list-group-item">
-          Lesson % attendance: {{student.attendance_percent}}
-        </li>
-        <li class="list-group-item">attendance: {{student.att_count}}</li>
-      </ul>
+
+      <table class="table">
+        <tr>
+          <th>Name:</th>
+          <td>
+            {{student.person.first_name.capitalize}}
+            {{student.person.other_name.capitalize}}
+          </td>
+        </tr>
+
+        <tr>
+          <th>Mode:</th>
+          <td>{{student.mode}}</td>
+        </tr>
+        <tr>
+          <th>Level:</th>
+
+          <td>
+            {% if student.levels == 'BK1'%} Book One {% else %} Book Two {%endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Local Meeting:</th>
+          <td>{{student.person.Local_church}}</td>
+        </tr>
+        <tr>
+          <th>Lesson % attendance:</th>
+          <td>{{student.attendance_percent}}</td>
+        </tr>
+        <tr>
+          <th>Class attended:</th>
+          <td>{{student.att_count}}</td>
+        </tr>
+      </table>
       <hr />
 
       <div class="card p-2 m-3">
         <p>
-        {% if student.mode == 'Online' %}
-        
+          {% if student.mode == 'Online' %}
+
           <a
             class="btn btn-sm btn-success"
             href="{% url 'online_register' person.id %}"
